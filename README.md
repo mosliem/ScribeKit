@@ -20,6 +20,7 @@ ScribeKit wraps `UITextView` in a `UIViewRepresentable` to deliver rich text edi
 - **Configurable Toolbar** — Choose which actions to display
 - **Placeholder Text** — Shows when the editor is empty
 - **Character Limit** — Optional `maxLength` enforcement
+- **Paste Mode** — Control paste behaviour: rich, plain text, or user-choice menu per paste
 - **Word Count Bar** — Optional live word and character count
 - **Read-Only Mode** — Set `isEditable: false` for display-only
 
@@ -213,6 +214,31 @@ context.removeLink()
 // Images
 context.insertImage()           // Opens photo picker
 ```
+
+### Paste Mode
+
+Control how pasted content is inserted via the `pasteMode` property on `EditorConfiguration`:
+
+```swift
+// Always paste rich (default)
+let config = EditorConfiguration(pasteMode: .rich)
+
+// Always strip formatting — pastes using the current typing attributes
+let config = EditorConfiguration(pasteMode: .plainText)
+
+// Let the user decide per paste via a context menu
+let config = EditorConfiguration(pasteMode: .userChoice)
+
+ScribeEditor(context: context, configuration: config)
+```
+
+| Mode | Behaviour |
+|------|-----------|
+| `.rich` | Preserves all formatting from the pasteboard (default) |
+| `.plainText` | Strips formatting; inserts plain text with current typing attributes |
+| `.userChoice` | Long-press paste shows **"Paste"** and **"Paste as Plain Text"** menu items |
+
+The system **"Paste and Match Style"** action always strips formatting regardless of `pasteMode`.
 
 ### Custom Theme
 
