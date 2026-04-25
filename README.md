@@ -298,43 +298,6 @@ struct StatusBar: View {
 | `characterCount` | `Int` | Live character count |
 | `attributedText` | `NSAttributedString` | Current content (computed, O(1)) |
 
-## Architecture
-
-```
-ScribeEditor (View)
-├── EditorToolbar (View)
-│   └── ToolbarButtonView × N
-├── EditorTextView (UIViewRepresentable)
-│   ├── UITextView
-│   └── EditorCoordinator (UITextViewDelegate)
-└── Sheet (LinkInputSheet | ImagePickerSheet)
-
-EditorContext (@Observable, @MainActor)
-├── activeStyles, currentAlignment, currentListStyle, currentHeadingStyle
-├── currentFontSize, currentForegroundColor, currentHighlightColor
-├── wordCount, characterCount, currentLink
-├── toggleStyle(), setAlignment(), toggleList(), setHeading()
-├── increaseFontSize(), decreaseFontSize()
-├── setForegroundColor(), setHighlightColor()
-├── increaseIndent(), decreaseIndent()
-├── insertLink(), commitLink(), removeLink()
-├── insertImage(), commitImage()
-├── setContent(html:), setContent(attributedString:), exportHTML()
-└── syncState() — called by coordinator on every text/selection change
-
-Formatters (stateless @MainActor structs, static methods only)
-├── FormattingEngine   — styles, alignment, font size
-├── ListFormatter      — list toggle, auto-continuation, renumbering
-├── HeadingFormatter   — heading level, font sizing
-├── ColorFormatter     — foreground and background color
-├── IndentFormatter    — head indent in 25pt steps
-├── LinkFormatter      — insert, detect, remove links
-└── ImageFormatter     — memory-efficient image insertion
-
-HTMLExporter → export(NSAttributedString) → String
-HTMLImporter → import(html:) → NSAttributedString
-```
-
 ### Key Design Decisions
 
 - **`@Observable` + `@MainActor`** — All state lives on `EditorContext`, which is `@MainActor`-isolated. The coordinator calls `syncState()` directly (no `Task` wrapper) for zero-frame-lag toolbar updates.
@@ -343,23 +306,6 @@ HTMLImporter → import(html:) → NSAttributedString
 - **`exportHTML()` is a method, not a computed property** — Avoids triggering expensive HTML generation during SwiftUI body evaluation.
 - **Sheet management via enum** — A single `EditorSheet` enum + `.sheet(item:)` replaces multiple boolean flags.
 
-## Example Project
-
-A complete example app is included in the [`Example/`](Example/) directory demonstrating all features:
-
-1. **Basic Editor** — Minimal setup with HTML export
-2. **Custom Toolbar** — Restricted actions + character limit
-3. **Read-Only** — HTML import in non-editable mode
-4. **Custom Theme** — Live theme switching with a toggle
-5. **HTML Round-Trip** — Import HTML → edit → export HTML
-
-To run:
-
-```bash
-cd Example/
-open SwiftyEditorExample.xcodeproj
-# Select an iOS 18+ simulator and press ⌘R
-```
 
 ## License
 
