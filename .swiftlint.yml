@@ -1,0 +1,24 @@
+excluded:
+  - .build
+  - Example/Pods
+  - Example/build
+  - Package.swift
+
+line_length:
+  warning: 150
+  error: 200
+
+cyclomatic_complexity:
+  warning: 20
+  error: 25
+
+function_body_length:
+  warning: 60
+  error: 100
+
+disabled_rules:
+  - closure_parameter_position
+
+large_tuple:
+  warning: 4
+  error: 5
