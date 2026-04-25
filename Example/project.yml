@@ -1,0 +1,34 @@
+name: SwiftyEditorExample
+
+options:
+  bundleIdPrefix: com.swiftyeditor
+  deploymentTarget:
+    iOS: "18.0"
+  swift: "6.0"
+  createIntermediateGroups: true
+  xcodeVersion: "16.0"
+
+packages:
+  SwiftyEditor:
+    path: ../
+
+targets:
+  SwiftyEditorExample:
+    type: application
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: Sources
+    resources: []
+    dependencies:
+      - package: SwiftyEditor
+        product: SwiftyEditor
+    settings:
+      base:
+        SWIFT_VERSION: "6.0"
+        INFOPLIST_FILE: Sources/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.swiftyeditor.example
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_STRICT_CONCURRENCY: complete
+        ENABLE_PREVIEWS: "YES"
