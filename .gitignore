@@ -1,3 +1,13 @@
 # Ignore all markdown files except README
 *.md
 !README.md
+
+# Build artifacts
+.build/
+.swiftpm/
+
+# Claude Code
+.claude/
+
+# Logs
+*.log
