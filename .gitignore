@@ -5,6 +5,20 @@
 # Build artifacts
 .build/
 .swiftpm/
+DerivedData/
+
+# Xcode user data
+*.xcuserstate
+xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# Xcode temporary files
+*.moved-aside
+*.orig
+
+# macOS
+.DS_Store
+**/.DS_Store
 
 # Claude Code
 .claude/
