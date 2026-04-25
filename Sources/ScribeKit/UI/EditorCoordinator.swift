@@ -41,6 +41,20 @@ final class EditorCoordinator: NSObject, UITextViewDelegate {
     func textViewDidChangeSelection(_ textView: UITextView) {
         context.syncState()
     }
+
+    func textView(
+        _ textView: UITextView,
+        editMenuForTextIn range: NSRange,
+        suggestedActions: [UIMenuElement]
+    ) -> UIMenu? {
+        guard let scribeView = textView as? ScribeTextView,
+              scribeView.configuration.pasteMode == .userChoice else {
+            return UIMenu(children: suggestedActions)
+        }
+        let pasteRich = UIAction(title: "Paste") { _ in scribeView.pasteRich() }
+        let pastePlain = UIAction(title: "Paste as Plain Text") { _ in scribeView.pastePlain() }
+        return UIMenu(children: suggestedActions + [pasteRich, pastePlain])
+    }
     
     func textView(
         _ textView: UITextView,

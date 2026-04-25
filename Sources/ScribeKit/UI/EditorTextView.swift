@@ -16,7 +16,9 @@ struct EditorTextView: UIViewRepresentable {
     }
 
     func makeUIView(context representableContext: Context) -> UITextView {
-        let textView = UITextView()
+        let textView = ScribeTextView()
+        textView.context = context
+        textView.configuration = configuration
         textView.delegate = representableContext.coordinator
         textView.isEditable = configuration.isEditable
         textView.isScrollEnabled = true
@@ -61,6 +63,7 @@ struct EditorTextView: UIViewRepresentable {
 
     func updateUIView(_ uiView: UITextView, context representableContext: Context) {
         // Sync config/theme changes at runtime
+        (uiView as? ScribeTextView)?.configuration = configuration
         if uiView.isEditable != configuration.isEditable {
             uiView.isEditable = configuration.isEditable
         }
