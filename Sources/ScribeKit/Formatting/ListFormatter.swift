@@ -2,8 +2,8 @@ import UIKit
 
 /// Custom `NSAttributedString.Key` for storing the list style at paragraph level.
 extension NSAttributedString.Key {
-    static let swiftyEditorListStyle: NSAttributedString.Key = NSAttributedString.Key(
-        "SwiftyEditor.listStyle")
+    static let scribeKitListStyle: NSAttributedString.Key = NSAttributedString.Key(
+        "ScribeKit.listStyle")
 }
 
 /// Handles all list toggling, detection, marker insertion, auto-continuation, and renumbering.
@@ -55,7 +55,7 @@ public struct ListFormatter {
         let loc = min(location, storage.length - 1)
         
         // 1. Check custom attribute
-        let value = storage.attribute(.swiftyEditorListStyle, at: loc, effectiveRange: nil) as? String
+        let value = storage.attribute(.scribeKitListStyle, at: loc, effectiveRange: nil) as? String
         if let rawValue = value, let style = EditorListStyle(rawValue: rawValue) {
             return style
         }
@@ -102,7 +102,7 @@ public struct ListFormatter {
             let strippedRange = NSRange(location: paraRange.location, length: paraRange.length)
             storage.replaceCharacters(in: strippedRange, with: "\n")
             storage.removeAttribute(
-                .swiftyEditorListStyle, range: NSRange(location: paraRange.location, length: 1))
+                .scribeKitListStyle, range: NSRange(location: paraRange.location, length: 1))
             storage.endEditing()
             textView.selectedRange = NSRange(location: paraRange.location + 1, length: 0)
             return true
@@ -120,7 +120,7 @@ public struct ListFormatter {
         if refLoc >= 0 {
             insertAttrs = storage.attributes(at: refLoc, effectiveRange: nil)
         }
-        insertAttrs[.swiftyEditorListStyle] = style.rawValue
+        insertAttrs[.scribeKitListStyle] = style.rawValue
         
         let insertString = NSAttributedString(string: insertion, attributes: insertAttrs)
         storage.beginEditing()
@@ -148,7 +148,7 @@ public struct ListFormatter {
             let prevParaRange = (storage.string as NSString).paragraphRange(
                 for: NSRange(location: prev, length: 0))
             let style =
-            storage.attribute(.swiftyEditorListStyle, at: prevParaRange.location, effectiveRange: nil)
+            storage.attribute(.scribeKitListStyle, at: prevParaRange.location, effectiveRange: nil)
             as? String
             if style == EditorListStyle.numbered.rawValue {
                 // Guard against non-progress (Issue #2: infinite loop if prevParaRange.location >= blockStart)
@@ -168,7 +168,7 @@ public struct ListFormatter {
             let paraRange = nsString.paragraphRange(for: NSRange(location: location, length: 0))
             guard paraRange.length > 0 else { break }  // safety: avoid zero-length infinite loop
             let style =
-            storage.attribute(.swiftyEditorListStyle, at: paraRange.location, effectiveRange: nil)
+            storage.attribute(.scribeKitListStyle, at: paraRange.location, effectiveRange: nil)
             as? String
             guard style == EditorListStyle.numbered.rawValue else { break }
             
@@ -222,7 +222,7 @@ public struct ListFormatter {
             if !alreadyHasMarker {
                 // Insert marker at the start of the paragraph
                 let markerAttrs: [NSAttributedString.Key: Any] = [
-                    .swiftyEditorListStyle: style.rawValue,
+                    .scribeKitListStyle: style.rawValue,
                     .paragraphStyle: indentedStyle()
                 ]
                 let markerString = NSAttributedString(string: marker, attributes: markerAttrs)
@@ -233,7 +233,7 @@ public struct ListFormatter {
             let updatedNSString = storage.string as NSString
             let updatedParaRange = updatedNSString.paragraphRange(
                 for: NSRange(location: location, length: 0))
-            storage.addAttribute(.swiftyEditorListStyle, value: style.rawValue, range: updatedParaRange)
+            storage.addAttribute(.scribeKitListStyle, value: style.rawValue, range: updatedParaRange)
             
             location = updatedParaRange.location + updatedParaRange.length
         }
@@ -272,7 +272,7 @@ public struct ListFormatter {
             let updatedNSString = storage.string as NSString
             let updatedParaRange = updatedNSString.paragraphRange(
                 for: NSRange(location: location, length: 0))
-            storage.removeAttribute(.swiftyEditorListStyle, range: updatedParaRange)
+            storage.removeAttribute(.scribeKitListStyle, range: updatedParaRange)
             let defaultStyle = NSMutableParagraphStyle()
             storage.addAttribute(.paragraphStyle, value: defaultStyle, range: updatedParaRange)
             
@@ -299,7 +299,7 @@ public struct ListFormatter {
             // Issue #3: guard against zero-length paragraphs that would stall the loop
             guard paraRange.length > 0 else { break }
             let attr =
-            storage.attribute(.swiftyEditorListStyle, at: paraRange.location, effectiveRange: nil)
+            storage.attribute(.scribeKitListStyle, at: paraRange.location, effectiveRange: nil)
             as? String
             if attr == EditorListStyle.numbered.rawValue {
                 count += 1

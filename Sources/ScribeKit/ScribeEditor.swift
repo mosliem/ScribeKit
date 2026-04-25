@@ -7,11 +7,11 @@ import SwiftUI
 /// @State private var context = EditorContext()
 ///
 /// var body: some View {
-///     SwiftyEditor(context: context)
+///     ScribeEditor(context: context)
 ///         .environment(\.editorTheme, MyCustomTheme())
 /// }
 /// ```
-public struct SwiftyEditor: View {
+public struct ScribeEditor: View {
     
     // @Bindable enables $context.activeSheet binding for .sheet(item:)
     @Bindable var context: EditorContext

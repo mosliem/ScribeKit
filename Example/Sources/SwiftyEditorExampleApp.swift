@@ -1,8 +1,8 @@
 import SwiftUI
-import SwiftyEditor
+import ScribeKit
 
 @main
-struct SwiftyEditorExampleApp: App {
+struct ScribeKitExampleApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()

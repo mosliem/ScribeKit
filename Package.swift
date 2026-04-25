@@ -2,25 +2,25 @@
 import PackageDescription
 
 let package = Package(
-  name: "SwiftyEditor",
+  name: "ScribeKit",
   platforms: [
     .iOS(.v18)
   ],
   products: [
     .library(
-      name: "SwiftyEditor",
-      targets: ["SwiftyEditor"]
+      name: "ScribeKit",
+      targets: ["ScribeKit"]
     )
   ],
   targets: [
     .target(
-      name: "SwiftyEditor",
-      path: "Sources/SwiftyEditor"
+      name: "ScribeKit",
+      path: "Sources/ScribeKit"
     ),
     .testTarget(
-      name: "SwiftyEditorTests",
-      dependencies: ["SwiftyEditor"],
-      path: "Tests/SwiftyEditorTests"
+      name: "ScribeKitTests",
+      dependencies: ["ScribeKit"],
+      path: "Tests/ScribeKitTests"
     ),
   ]
 )

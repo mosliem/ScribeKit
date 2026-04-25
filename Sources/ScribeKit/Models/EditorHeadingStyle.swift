@@ -40,5 +40,5 @@ public enum EditorHeadingStyle: String, Hashable, Sendable, CaseIterable, Identi
 
 extension NSAttributedString.Key {
     /// Paragraph-level attribute storing the raw value of `EditorHeadingStyle`.
-    static let swiftyEditorHeadingStyle: NSAttributedString.Key = NSAttributedString.Key("SwiftyEditor.headingStyle")
+    static let scribeKitHeadingStyle: NSAttributedString.Key = NSAttributedString.Key("ScribeKit.headingStyle")
 }

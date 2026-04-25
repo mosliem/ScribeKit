@@ -19,7 +19,7 @@
     <key>CFBundleVersion</key>
     <string>$(CURRENT_PROJECT_VERSION)</string>
     <key>NSPhotoLibraryUsageDescription</key>
-    <string>SwiftyEditor uses your photo library to insert images into the editor.</string>
+    <string>ScribeKit uses your photo library to insert images into the editor.</string>
     <key>UIApplicationSceneManifest</key>
     <dict>
         <key>UIApplicationSupportsMultipleScenes</key>

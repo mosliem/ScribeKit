@@ -27,7 +27,7 @@ public struct HeadingFormatter {
                 let headingFont = fontByApplyingHeadingSize(style.fontSize, to: base, addingBold: true)
                 storage.addAttribute(.font, value: headingFont, range: range)
             }
-            storage.addAttribute(.swiftyEditorHeadingStyle, value: style.rawValue, range: paragraphRange)
+            storage.addAttribute(.scribeKitHeadingStyle, value: style.rawValue, range: paragraphRange)
         } else {
             // Revert to body: restore default size, remove heading attribute.
             // Bold trait applied by the user remains; only the size is reset.
@@ -36,7 +36,7 @@ public struct HeadingFormatter {
                 let bodyFont = UIFont(descriptor: base.fontDescriptor, size: defaultBodySize)
                 storage.addAttribute(.font, value: bodyFont, range: range)
             }
-            storage.removeAttribute(.swiftyEditorHeadingStyle, range: paragraphRange)
+            storage.removeAttribute(.scribeKitHeadingStyle, range: paragraphRange)
         }
         
         storage.endEditing()
@@ -50,7 +50,7 @@ public struct HeadingFormatter {
         guard storage.length > 0 else { return nil }
         let location = min(textView.selectedRange.location, storage.length - 1)
         let value =
-        storage.attribute(.swiftyEditorHeadingStyle, at: location, effectiveRange: nil) as? String
+        storage.attribute(.scribeKitHeadingStyle, at: location, effectiveRange: nil) as? String
         return value.flatMap { EditorHeadingStyle(rawValue: $0) }
     }
     

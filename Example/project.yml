@@ -1,4 +1,4 @@
-name: SwiftyEditorExample
+name: ScribeKitExample
 
 options:
   bundleIdPrefix: com.swiftyeditor
@@ -9,11 +9,11 @@ options:
   xcodeVersion: "16.0"
 
 packages:
-  SwiftyEditor:
+  ScribeKit:
     path: ../
 
 targets:
-  SwiftyEditorExample:
+  ScribeKitExample:
     type: application
     platform: iOS
     deploymentTarget: "18.0"
@@ -21,8 +21,8 @@ targets:
       - path: Sources
     resources: []
     dependencies:
-      - package: SwiftyEditor
-        product: SwiftyEditor
+      - package: ScribeKit
+        product: ScribeKit
     settings:
       base:
         SWIFT_VERSION: "6.0"

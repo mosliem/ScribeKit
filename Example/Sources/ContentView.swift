@@ -1,7 +1,7 @@
 import SwiftUI
-import SwiftyEditor
+import ScribeKit
 
-/// Main content view demonstrating all SwiftyEditor capabilities.
+/// Main content view demonstrating all ScribeKit capabilities.
 struct ContentView: View {
     
     @State private var context = EditorContext()
@@ -24,7 +24,7 @@ struct ContentView: View {
             List(ExamplePage.allCases) { page in
                 NavigationLink(page.rawValue, value: page)
             }
-            .navigationTitle("SwiftyEditor Examples")
+            .navigationTitle("ScribeKit Examples")
             .navigationDestination(for: ExamplePage.self) { page in
                 switch page {
                 case .basicEditor:
@@ -45,7 +45,7 @@ struct ContentView: View {
 
 // MARK: - 1. Basic Editor
 
-/// The simplest possible integration — just an `EditorContext` and a `SwiftyEditor`.
+/// The simplest possible integration — just an `EditorContext` and a `ScribeEditor`.
 struct BasicEditorView: View {
     
     @State private var context = EditorContext()
@@ -55,7 +55,7 @@ struct BasicEditorView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                SwiftyEditor(context: context)
+                ScribeEditor(context: context)
                     .frame(minHeight: 300)
                     .padding(.horizontal)
                 
@@ -96,7 +96,7 @@ struct CustomToolbarView: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            SwiftyEditor(context: context, configuration: config)
+            ScribeEditor(context: context, configuration: config)
                 .frame(minHeight: 250)
                 .padding(.horizontal)
             
@@ -127,7 +127,7 @@ struct ReadOnlyView: View {
     private let config = EditorConfiguration(isEditable: false)
     
     private let sampleHTML = """
-    <p><strong>SwiftyEditor</strong> is a modular rich text editor for SwiftUI.</p>
+    <p><strong>ScribeKit</strong> is a modular rich text editor for SwiftUI.</p>
     <p>It supports <em>italic</em>, <u>underline</u>, <s>strikethrough</s>, and <strong>bold</strong> formatting.</p>
     <ul>
     <li>Bullet lists</li>
@@ -140,7 +140,7 @@ struct ReadOnlyView: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            SwiftyEditor(context: context, configuration: config)
+            ScribeEditor(context: context, configuration: config)
                 .frame(minHeight: 350)
                 .padding(.horizontal)
             
@@ -184,7 +184,7 @@ struct CustomThemeView: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            SwiftyEditor(context: context)
+            ScribeEditor(context: context)
                 .environment(\.editorTheme, currentTheme)
                 .frame(minHeight: 300)
                 .padding(.horizontal)
@@ -234,7 +234,7 @@ struct HTMLRoundTripView: View {
                     .font(.headline)
                     .padding(.horizontal)
                 
-                SwiftyEditor(context: context)
+                ScribeEditor(context: context)
                     .frame(minHeight: 250)
                     .padding(.horizontal)
                 

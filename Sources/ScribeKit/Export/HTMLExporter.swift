@@ -23,11 +23,11 @@ public struct HTMLExporter {
             let (paraText, paraAttrs, paraRange) = paragraph
             let listStyle =
             attributedString.attribute(
-                .swiftyEditorListStyle, at: paraRange.location, effectiveRange: nil) as? String
+                .scribeKitListStyle, at: paraRange.location, effectiveRange: nil) as? String
             let editorListStyle = listStyle.flatMap { EditorListStyle(rawValue: $0) }
             let headingStyle =
             attributedString.attribute(
-                .swiftyEditorHeadingStyle, at: paraRange.location, effectiveRange: nil) as? String
+                .scribeKitHeadingStyle, at: paraRange.location, effectiveRange: nil) as? String
             let editorHeadingStyle = headingStyle.flatMap { EditorHeadingStyle(rawValue: $0) }
 
             // Open/close list tags

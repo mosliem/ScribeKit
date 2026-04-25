@@ -1,7 +1,7 @@
 import UIKit
 import XCTest
 
-@testable import SwiftyEditor
+@testable import ScribeKit
 
 final class HTMLImporterTests: XCTestCase {
     

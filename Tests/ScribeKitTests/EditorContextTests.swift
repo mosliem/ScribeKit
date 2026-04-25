@@ -1,7 +1,7 @@
 import SwiftUI
 import XCTest
 
-@testable import SwiftyEditor
+@testable import ScribeKit
 
 @MainActor
 final class EditorContextTests: XCTestCase {

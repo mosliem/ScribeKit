@@ -8,16 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		58705E49CBC9B675A7B3AC70 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEBD052DF146C278498D9CEC /* ContentView.swift */; };
-		9BEB91FC65CF1DF181AECBB6 /* SwiftyEditor in Frameworks */ = {isa = PBXBuildFile; productRef = 2B1C027AAD5BDCDF53F3C519 /* SwiftyEditor */; };
-		D27A586B8EC5D8434D051B13 /* SwiftyEditorExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6B588AC9AB6CAB17D14E07 /* SwiftyEditorExampleApp.swift */; };
+		9BEB91FC65CF1DF181AECBB6 /* ScribeKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2B1C027AAD5BDCDF53F3C519 /* ScribeKit */; };
+		D27A586B8EC5D8434D051B13 /* ScribeKitExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6B588AC9AB6CAB17D14E07 /* ScribeKitExampleApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		063FEB026A9237211A62B12E /* SwiftyEditorExample.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SwiftyEditorExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		063FEB026A9237211A62B12E /* ScribeKitExample.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ScribeKitExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C306FF3B12CA5307C27D768 /* Editor */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Editor; path = ..; sourceTree = SOURCE_ROOT; };
 		AED00FBC166644600DFBA875 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		EEBD052DF146C278498D9CEC /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		FA6B588AC9AB6CAB17D14E07 /* SwiftyEditorExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftyEditorExampleApp.swift; sourceTree = "<group>"; };
+		FA6B588AC9AB6CAB17D14E07 /* ScribeKitExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScribeKitExampleApp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -25,7 +25,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9BEB91FC65CF1DF181AECBB6 /* SwiftyEditor in Frameworks */,
+				9BEB91FC65CF1DF181AECBB6 /* ScribeKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -44,7 +44,7 @@
 		63D84B0FC8988337B7ED2BEE /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				063FEB026A9237211A62B12E /* SwiftyEditorExample.app */,
+				063FEB026A9237211A62B12E /* ScribeKitExample.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -62,7 +62,7 @@
 			children = (
 				EEBD052DF146C278498D9CEC /* ContentView.swift */,
 				AED00FBC166644600DFBA875 /* Info.plist */,
-				FA6B588AC9AB6CAB17D14E07 /* SwiftyEditorExampleApp.swift */,
+				FA6B588AC9AB6CAB17D14E07 /* ScribeKitExampleApp.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -70,9 +70,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		C55E292F87E319871EA2B7AC /* SwiftyEditorExample */ = {
+		C55E292F87E319871EA2B7AC /* ScribeKitExample */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CB8530544838CF350CAFC8D3 /* Build configuration list for PBXNativeTarget "SwiftyEditorExample" */;
+			buildConfigurationList = CB8530544838CF350CAFC8D3 /* Build configuration list for PBXNativeTarget "ScribeKitExample" */;
 			buildPhases = (
 				4A11CEC2F58281597AEA057C /* Sources */,
 				CCE8F1B9DE96271D98F6762A /* Frameworks */,
@@ -81,12 +81,12 @@
 			);
 			dependencies = (
 			);
-			name = SwiftyEditorExample;
+			name = ScribeKitExample;
 			packageProductDependencies = (
-				2B1C027AAD5BDCDF53F3C519 /* SwiftyEditor */,
+				2B1C027AAD5BDCDF53F3C519 /* ScribeKit */,
 			);
-			productName = SwiftyEditorExample;
-			productReference = 063FEB026A9237211A62B12E /* SwiftyEditorExample.app */;
+			productName = ScribeKitExample;
+			productReference = 063FEB026A9237211A62B12E /* ScribeKitExample.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -98,7 +98,7 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
 			};
-			buildConfigurationList = 3285A7355B7A4B05E00A9E76 /* Build configuration list for PBXProject "SwiftyEditorExample" */;
+			buildConfigurationList = 3285A7355B7A4B05E00A9E76 /* Build configuration list for PBXProject "ScribeKitExample" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -115,7 +115,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C55E292F87E319871EA2B7AC /* SwiftyEditorExample */,
+				C55E292F87E319871EA2B7AC /* ScribeKitExample */,
 			);
 		};
 /* End PBXProject section */
@@ -126,7 +126,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				58705E49CBC9B675A7B3AC70 /* ContentView.swift in Sources */,
-				D27A586B8EC5D8434D051B13 /* SwiftyEditorExampleApp.swift in Sources */,
+				D27A586B8EC5D8434D051B13 /* ScribeKitExampleApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -299,7 +299,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3285A7355B7A4B05E00A9E76 /* Build configuration list for PBXProject "SwiftyEditorExample" */ = {
+		3285A7355B7A4B05E00A9E76 /* Build configuration list for PBXProject "ScribeKitExample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				84E4F2549F271B2AB3D2E2F6 /* Debug */,
@@ -308,7 +308,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		CB8530544838CF350CAFC8D3 /* Build configuration list for PBXNativeTarget "SwiftyEditorExample" */ = {
+		CB8530544838CF350CAFC8D3 /* Build configuration list for PBXNativeTarget "ScribeKitExample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				310EEB434E640AD64626095E /* Debug */,
@@ -327,9 +327,9 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		2B1C027AAD5BDCDF53F3C519 /* SwiftyEditor */ = {
+		2B1C027AAD5BDCDF53F3C519 /* ScribeKit */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = SwiftyEditor;
+			productName = ScribeKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

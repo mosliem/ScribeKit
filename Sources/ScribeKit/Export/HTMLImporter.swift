@@ -126,7 +126,7 @@ public struct HTMLImporter {
                     .trimmingCharacters(in: .whitespacesAndNewlines)
 
                 if paraText == headingText, let style = EditorHeadingStyle(rawValue: "h\(level)") {
-                    attrStr.addAttribute(.swiftyEditorHeadingStyle, value: style.rawValue, range: paraRange)
+                    attrStr.addAttribute(.scribeKitHeadingStyle, value: style.rawValue, range: paraRange)
                     // Ensure the heading font is applied (system parser may have used a slightly
                     // different size; our fixed sizes keep round-trips consistent)
                     HeadingFormatter.applyHeadingFont(style, to: attrStr, in: paraRange)
@@ -151,19 +151,19 @@ public struct HTMLImporter {
 
             if paraText.hasPrefix("• ") {
                 attrStr.addAttribute(
-                    .swiftyEditorListStyle,
+                    .scribeKitListStyle,
                     value: EditorListStyle.bullet.rawValue,
                     range: paraRange
                 )
             } else if paraText.hasPrefix("- ") {
                 attrStr.addAttribute(
-                    .swiftyEditorListStyle,
+                    .scribeKitListStyle,
                     value: EditorListStyle.dash.rawValue,
                     range: paraRange
                 )
             } else if paraText.range(of: #"^\d+\. "#, options: .regularExpression) != nil {
                 attrStr.addAttribute(
-                    .swiftyEditorListStyle,
+                    .scribeKitListStyle,
                     value: EditorListStyle.numbered.rawValue,
                     range: paraRange
                 )

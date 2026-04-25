@@ -2,7 +2,7 @@
 import UIKit
 import XCTest
 
-@testable import SwiftyEditor
+@testable import ScribeKit
 
 final class HTMLExporterTests: XCTestCase {
     
@@ -74,7 +74,7 @@ final class HTMLExporterTests: XCTestCase {
     
     func testExport_BulletList_WrapsInUL() {
         let attrs: [NSAttributedString.Key: Any] = [
-            .swiftyEditorListStyle: EditorListStyle.bullet.rawValue
+            .scribeKitListStyle: EditorListStyle.bullet.rawValue
         ]
         let attrStr = NSAttributedString(string: "• Item", attributes: attrs)
         let result = HTMLExporter.export(attrStr)
@@ -84,7 +84,7 @@ final class HTMLExporterTests: XCTestCase {
     
     func testExport_NumberedList_WrapsInOL() {
         let attrs: [NSAttributedString.Key: Any] = [
-            .swiftyEditorListStyle: EditorListStyle.numbered.rawValue
+            .scribeKitListStyle: EditorListStyle.numbered.rawValue
         ]
         let attrStr = NSAttributedString(string: "1. Item", attributes: attrs)
         let result = HTMLExporter.export(attrStr)
