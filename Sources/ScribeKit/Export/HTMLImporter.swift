@@ -1,6 +1,7 @@
 import UIKit
 
 /// Converts an HTML string into an `NSAttributedString` compatible with the editor.
+@MainActor
 public struct HTMLImporter {
 
     /// Font sizes from the system HTML parser at or below this threshold are considered
