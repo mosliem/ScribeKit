@@ -2,6 +2,7 @@ import UIKit
 
 /// An on-demand content snapshot of the editor.
 /// Create when you need the content — do not store on `EditorContext` to avoid continuous re-export.
+@MainActor
 public struct EditorContent {
     /// The raw attributed string.
     public let attributedString: NSAttributedString
