@@ -298,14 +298,6 @@ struct StatusBar: View {
 | `characterCount` | `Int` | Live character count |
 | `attributedText` | `NSAttributedString` | Current content (computed, O(1)) |
 
-### Key Design Decisions
-
-- **`@Observable` + `@MainActor`** — All state lives on `EditorContext`, which is `@MainActor`-isolated. The coordinator calls `syncState()` directly (no `Task` wrapper) for zero-frame-lag toolbar updates.
-- **Stateless formatters** — All formatters are pure `struct`s with `static` methods. Fully unit-testable without a `UITextView`.
-- **Value-change guards** — `syncState()` only assigns properties when values actually change, preventing unnecessary SwiftUI invalidation on every keystroke.
-- **`exportHTML()` is a method, not a computed property** — Avoids triggering expensive HTML generation during SwiftUI body evaluation.
-- **Sheet management via enum** — A single `EditorSheet` enum + `.sheet(item:)` replaces multiple boolean flags.
-
 
 ## License
 
