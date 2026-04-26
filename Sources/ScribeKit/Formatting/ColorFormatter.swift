@@ -17,6 +17,19 @@ public struct ColorFormatter {
             textView.textStorage.endEditing()
         }
     }
+
+    /// Removes the foreground (text) color at the current selection or typing position,
+    /// reverting to the default label color.
+    public static func removeForegroundColor(in textView: UITextView) {
+        let selectedRange = textView.selectedRange
+        if selectedRange.length == 0 {
+            textView.typingAttributes.removeValue(forKey: .foregroundColor)
+        } else {
+            textView.textStorage.beginEditing()
+            textView.textStorage.removeAttribute(.foregroundColor, range: selectedRange)
+            textView.textStorage.endEditing()
+        }
+    }
     
     /// Returns the foreground color at the cursor or start of selection, or `nil` if none is set.
     /// Returns `nil` when the run's color comes from a link (avoids reporting link blue as text color).

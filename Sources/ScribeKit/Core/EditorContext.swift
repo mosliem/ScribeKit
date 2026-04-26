@@ -154,6 +154,13 @@ public final class EditorContext {
         syncState()
     }
 
+    /// Removes the foreground (text) color, reverting to the default label color.
+    public func resetForegroundColor() {
+        guard let textView else { return }
+        ColorFormatter.removeForegroundColor(in: textView)
+        syncState()
+    }
+
     /// Sets or removes the background (highlight) color at the current selection.
     public func setHighlightColor(_ color: Color?) {
         guard let textView else { return }
