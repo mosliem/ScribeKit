@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -98,20 +98,20 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
 			};
-			buildConfigurationList = 3285A7355B7A4B05E00A9E76 /* Build configuration list for PBXProject "ScribeKitExample" */;
+			buildConfigurationList = 3285A7355B7A4B05E00A9E76 /* Build configuration list for PBXProject "SwiftyEditorExample" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
 				en,
+				ar,
 			);
 			mainGroup = 5E85419379FCDC3E76D5CE6B;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				1C258A86E98B3D2470C49909 /* XCLocalSwiftPackageReference "..//" */,
 			);
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -299,7 +299,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3285A7355B7A4B05E00A9E76 /* Build configuration list for PBXProject "ScribeKitExample" */ = {
+		3285A7355B7A4B05E00A9E76 /* Build configuration list for PBXProject "SwiftyEditorExample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				84E4F2549F271B2AB3D2E2F6 /* Debug */,
