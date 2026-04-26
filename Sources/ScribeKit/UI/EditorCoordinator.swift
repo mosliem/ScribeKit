@@ -51,8 +51,8 @@ final class EditorCoordinator: NSObject, UITextViewDelegate {
               scribeView.configuration.pasteMode == .userChoice else {
             return UIMenu(children: suggestedActions)
         }
-        let pasteRich = UIAction(title: "Paste") { _ in scribeView.pasteRich() }
-        let pastePlain = UIAction(title: "Paste as Plain Text") { _ in scribeView.pastePlain() }
+        let pasteRich = UIAction(title: .localized("paste.rich")) { _ in scribeView.pasteRich() }
+        let pastePlain = UIAction(title: .localized("paste.plain")) { _ in scribeView.pastePlain() }
         return UIMenu(children: suggestedActions + [pasteRich, pastePlain])
     }
     

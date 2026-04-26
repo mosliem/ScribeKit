@@ -28,7 +28,7 @@ public struct ImagePickerSheet: View {
             if isLoading {
                 VStack {
                     Spacer()
-                    ProgressView("Loading image…")
+                    ProgressView(String.localized("image.loading"))
                     Spacer()
                 }
             } else {
@@ -43,8 +43,8 @@ public struct ImagePickerSheet: View {
                 .ignoresSafeArea(edges: .bottom)
             }
         }
-        .alert("Image Load Failed", isPresented: $showError) {
-            Button("OK", role: .cancel) {}
+        .alert(String.localized("image.error.title"), isPresented: $showError) {
+            Button(String.localized("button.ok"), role: .cancel) {}
         } message: {
             Text(errorMessage)
         }
@@ -63,7 +63,7 @@ public struct ImagePickerSheet: View {
         defer { isLoading = false }
         do {
             guard let data = try await item.loadTransferable(type: Data.self) else {
-                errorMessage = "The selected image could not be loaded. Please try another photo."
+                errorMessage = .localized("image.error.no_data")
                 showError = true
                 return
             }
@@ -72,7 +72,7 @@ public struct ImagePickerSheet: View {
                 dismiss()
             }
         } catch {
-            errorMessage = "Failed to load image: \(error.localizedDescription)"
+            errorMessage = String(format: .localized("image.error.load_failed"), error.localizedDescription)
             showError = true
         }
     }

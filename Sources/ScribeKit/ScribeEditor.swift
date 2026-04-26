@@ -80,7 +80,7 @@ private struct WordCountBar: View {
     var body: some View {
         HStack {
             Spacer()
-            Text("\(context.wordCount) words · \(context.characterCount) characters")
+            Text(String(format: .localized("wordcount.format"), context.wordCount, context.characterCount))
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }

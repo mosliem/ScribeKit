@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
   name: "ScribeKit",
+  defaultLocalization: "en",
   platforms: [
     .iOS(.v18)
   ],
@@ -15,7 +16,8 @@ let package = Package(
   targets: [
     .target(
       name: "ScribeKit",
-      path: "Sources/ScribeKit"
+      path: "Sources/ScribeKit",
+      resources: [.process("Resources")]
     ),
     .testTarget(
       name: "ScribeKitTests",

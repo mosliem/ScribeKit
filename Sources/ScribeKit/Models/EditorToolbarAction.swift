@@ -84,47 +84,28 @@ public enum EditorToolbarAction: String, Hashable, Sendable, CaseIterable, Ident
         }
     }
 
-    /// A human-readable accessibility label.
+    /// A human-readable accessibility label, localized for the current locale.
     public var accessibilityLabel: String {
         switch self {
-        case .bold: 
-            return "Bold"
-        case .italic: 
-            return "Italic"
-        case .underline: 
-            return "Underline"
-        case .strikethrough:
-            return "Strikethrough"
-        case .alignLeading:
-            return "Align leading"
-        case .alignCenter:
-            return "Align center"
-        case .alignTrailing: 
-            return "Align trailing"
-        case .bulletList: 
-            return "Bullet list"
-        case .numberedList: 
-            return "Numbered list"
-        case .dashList: 
-            return "Dash list"
-        case .headingMenu: 
-            return "Heading style"
-        case .decreaseFontSize: 
-            return "Decrease font size"
-        case .increaseFontSize:
-            return "Increase font size"
-        case .textColor: 
-            return "Text color"
-        case .highlightColor: 
-            return "Highlight color"
-        case .increaseIndent:
-            return "Increase indent"
-        case .decreaseIndent:
-            return "Decrease indent"
-        case .link:
-            return "Insert link"
-        case .image: 
-            return "Insert image"
+        case .bold:            return .localized("action.bold")
+        case .italic:          return .localized("action.italic")
+        case .underline:       return .localized("action.underline")
+        case .strikethrough:   return .localized("action.strikethrough")
+        case .alignLeading:    return .localized("action.align_leading")
+        case .alignCenter:     return .localized("action.align_center")
+        case .alignTrailing:   return .localized("action.align_trailing")
+        case .bulletList:      return .localized("action.bullet_list")
+        case .numberedList:    return .localized("action.numbered_list")
+        case .dashList:        return .localized("action.dash_list")
+        case .headingMenu:     return .localized("action.heading_style")
+        case .decreaseFontSize: return .localized("action.decrease_font_size")
+        case .increaseFontSize: return .localized("action.increase_font_size")
+        case .textColor:       return .localized("action.text_color")
+        case .highlightColor:  return .localized("action.highlight_color")
+        case .increaseIndent:  return .localized("action.increase_indent")
+        case .decreaseIndent:  return .localized("action.decrease_indent")
+        case .link:            return .localized("action.insert_link")
+        case .image:           return .localized("action.insert_image")
         }
     }
 }

@@ -1,0 +1,58 @@
+// MARK: - Toolbar
+"toolbar.accessibility_label" = "Formatting toolbar";
+"toolbar.text_color" = "Text color";
+"toolbar.highlight_color" = "Highlight color";
+
+// MARK: - Toolbar Actions (accessibility labels)
+"action.bold" = "Bold";
+"action.italic" = "Italic";
+"action.underline" = "Underline";
+"action.strikethrough" = "Strikethrough";
+"action.align_leading" = "Align leading";
+"action.align_center" = "Align center";
+"action.align_trailing" = "Align trailing";
+"action.bullet_list" = "Bullet list";
+"action.numbered_list" = "Numbered list";
+"action.dash_list" = "Dash list";
+"action.heading_style" = "Heading style";
+"action.decrease_font_size" = "Decrease font size";
+"action.increase_font_size" = "Increase font size";
+"action.text_color" = "Text color";
+"action.highlight_color" = "Highlight color";
+"action.increase_indent" = "Increase indent";
+"action.decrease_indent" = "Decrease indent";
+"action.insert_link" = "Insert link";
+"action.insert_image" = "Insert image";
+
+// MARK: - Heading Styles
+"heading.heading1" = "Heading 1";
+"heading.heading2" = "Heading 2";
+"heading.heading3" = "Heading 3";
+"heading.body" = "Body";
+
+// MARK: - Link Sheet
+"link.section.url" = "URL";
+"link.placeholder.url" = "https://example.com";
+"link.section.display_text" = "Display Text";
+"link.placeholder.display_text" = "Link text";
+"link.button.remove" = "Remove Link";
+"link.title.insert" = "Insert Link";
+"link.title.edit" = "Edit Link";
+
+// MARK: - Image Picker Sheet
+"image.loading" = "Loading image\u{2026}";
+"image.error.title" = "Image Load Failed";
+"image.error.no_data" = "The selected image could not be loaded. Please try another photo.";
+"image.error.load_failed" = "Failed to load image: %@";
+
+// MARK: - Paste Menu
+"paste.rich" = "Paste";
+"paste.plain" = "Paste as Plain Text";
+
+// MARK: - Common Buttons
+"button.cancel" = "Cancel";
+"button.done" = "Done";
+"button.ok" = "OK";
+
+// MARK: - Word Count Bar
+"wordcount.format" = "%lld words \u{00B7} %lld characters";

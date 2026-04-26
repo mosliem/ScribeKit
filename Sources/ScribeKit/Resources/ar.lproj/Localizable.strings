@@ -1,0 +1,58 @@
+// MARK: - Toolbar
+"toolbar.accessibility_label" = "شريط التنسيق";
+"toolbar.text_color" = "لون النص";
+"toolbar.highlight_color" = "لون التمييز";
+
+// MARK: - Toolbar Actions (accessibility labels)
+"action.bold" = "غامق";
+"action.italic" = "مائل";
+"action.underline" = "تسطير";
+"action.strikethrough" = "يتوسطه خط";
+"action.align_leading" = "محاذاة للبداية";
+"action.align_center" = "توسيط";
+"action.align_trailing" = "محاذاة للنهاية";
+"action.bullet_list" = "قائمة نقطية";
+"action.numbered_list" = "قائمة مرقمة";
+"action.dash_list" = "قائمة بشرطات";
+"action.heading_style" = "نمط العنوان";
+"action.decrease_font_size" = "تصغير حجم الخط";
+"action.increase_font_size" = "تكبير حجم الخط";
+"action.text_color" = "لون النص";
+"action.highlight_color" = "لون التمييز";
+"action.increase_indent" = "زيادة المسافة البادئة";
+"action.decrease_indent" = "تقليل المسافة البادئة";
+"action.insert_link" = "إدراج رابط";
+"action.insert_image" = "إدراج صورة";
+
+// MARK: - Heading Styles
+"heading.heading1" = "عنوان 1";
+"heading.heading2" = "عنوان 2";
+"heading.heading3" = "عنوان 3";
+"heading.body" = "نص عادي";
+
+// MARK: - Link Sheet
+"link.section.url" = "رابط";
+"link.placeholder.url" = "https://example.com";
+"link.section.display_text" = "نص العرض";
+"link.placeholder.display_text" = "نص الرابط";
+"link.button.remove" = "إزالة الرابط";
+"link.title.insert" = "إدراج رابط";
+"link.title.edit" = "تعديل الرابط";
+
+// MARK: - Image Picker Sheet
+"image.loading" = "جارٍ تحميل الصورة…";
+"image.error.title" = "فشل تحميل الصورة";
+"image.error.no_data" = "تعذّر تحميل الصورة المحددة. يرجى اختيار صورة أخرى.";
+"image.error.load_failed" = "فشل تحميل الصورة: %@";
+
+// MARK: - Paste Menu
+"paste.rich" = "لصق";
+"paste.plain" = "لصق كنص عادي";
+
+// MARK: - Common Buttons
+"button.cancel" = "إلغاء";
+"button.done" = "تم";
+"button.ok" = "حسناً";
+
+// MARK: - Word Count Bar
+"wordcount.format" = "%lld كلمة · %lld حرف";

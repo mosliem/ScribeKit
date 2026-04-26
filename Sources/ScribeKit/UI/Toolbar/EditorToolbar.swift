@@ -40,7 +40,7 @@ struct EditorToolbar: View {
         }
         .background(theme.toolbarBackgroundColor)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("Formatting toolbar")
+        .accessibilityLabel(Text(localized: "toolbar.accessibility_label"))
     }
 
     // MARK: - Control Builder
@@ -53,16 +53,20 @@ struct EditorToolbar: View {
             headingMenuButton
 
         case .textColor:
-            ColorPicker("Text color", selection: foregroundColorBinding, supportsOpacity: false)
-                .labelsHidden()
-                .frame(width: 36, height: 36)
-                .accessibilityLabel(action.accessibilityLabel)
+            ColorPicker(selection: foregroundColorBinding, supportsOpacity: true) {
+                Text(localized: "toolbar.text_color")
+            }
+            .labelsHidden()
+            .frame(width: 36, height: 36)
+            .accessibilityLabel(action.accessibilityLabel)
 
         case .highlightColor:
-            ColorPicker("Highlight color", selection: highlightColorBinding, supportsOpacity: false)
-                .labelsHidden()
-                .frame(width: 36, height: 36)
-                .accessibilityLabel(action.accessibilityLabel)
+            ColorPicker(selection: highlightColorBinding, supportsOpacity: true) {
+                Text(localized: "toolbar.highlight_color")
+            }
+            .labelsHidden()
+            .frame(width: 36, height: 36)
+            .accessibilityLabel(action.accessibilityLabel)
 
         default:
             ToolbarButtonView(
@@ -88,7 +92,7 @@ struct EditorToolbar: View {
             Button {
                 context.setHeading(nil)
             } label: {
-                Label("Body", systemImage: "text.alignleft")
+                Label(String.localized("heading.body"), systemImage: "text.alignleft")
             }
         } label: {
             Image(systemName: EditorToolbarAction.headingMenu.symbolName)
@@ -127,14 +131,22 @@ struct EditorToolbar: View {
     private var foregroundColorBinding: Binding<Color> {
         Binding(
             get: { context.currentForegroundColor ?? Color(.label) },
-            set: { context.setForegroundColor($0) }
+            set: { color in
+                if UIColor(color).cgColor.alpha < 0.01 {
+                    context.resetForegroundColor()
+                } else {
+                    context.setForegroundColor(color)
+                }
+            }
         )
     }
 
     private var highlightColorBinding: Binding<Color> {
         Binding(
             get: { context.currentHighlightColor ?? Color(.clear) },
-            set: { context.setHighlightColor($0 == .clear ? nil : $0) }
+            set: { color in
+                context.setHighlightColor(UIColor(color).cgColor.alpha < 0.01 ? nil : color)
+            }
         )
     }
 
@@ -190,9 +202,9 @@ struct EditorToolbar: View {
         case .alignLeading:
             context.setAlignment(.leading)
         case .alignCenter:
-            context.setAlignment(.center)
+            context.setAlignment(context.currentAlignment == .center ? .leading : .center)
         case .alignTrailing:
-            context.setAlignment(.trailing)
+            context.setAlignment(context.currentAlignment == .trailing ? .leading : .trailing)
         case .bulletList:
             context.toggleList(.bullet)
         case .numberedList:

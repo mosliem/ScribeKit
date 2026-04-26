@@ -20,15 +20,12 @@ public enum EditorHeadingStyle: String, Hashable, Sendable, CaseIterable, Identi
         }
     }
     
-    /// Human-readable name shown in menus.
+    /// Human-readable name shown in menus, localized for the current locale.
     public var displayName: String {
         switch self {
-        case .heading1: 
-            return "Heading 1"
-        case .heading2:
-            return "Heading 2"
-        case .heading3:
-            return "Heading 3"
+        case .heading1: return .localized("heading.heading1")
+        case .heading2: return .localized("heading.heading2")
+        case .heading3: return .localized("heading.heading3")
         }
     }
     
