@@ -70,7 +70,12 @@ public final class EditorContext {
     /// Sets the editor content from an HTML string.
     public func setContent(html: String) {
         guard let textView else { return }
-        let imported = HTMLImporter.import(html: html)
+        // Use the text view's configured font so imported content matches the theme font.
+        // Without this, HTMLImporter uses its hardcoded 16pt system font default, which
+        // diverges from the theme font and causes exported content to carry the wrong
+        // font size before the user types anything.
+        let bodyFont = textView.font ?? UIFont.systemFont(ofSize: 16)
+        let imported = HTMLImporter.import(html: html, defaultFont: bodyFont)
         textView.textStorage.beginEditing()
         textView.textStorage.setAttributedString(imported)
         textView.textStorage.endEditing()

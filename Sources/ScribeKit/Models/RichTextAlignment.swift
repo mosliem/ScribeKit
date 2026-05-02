@@ -13,7 +13,12 @@ public enum RichTextAlignment: String, Hashable, Sendable, CaseIterable {
     -> NSTextAlignment {
         switch self {
         case .leading:
-            return .natural
+            // Use an explicit alignment so the paragraph always snaps to the UI leading edge,
+            // regardless of the text's own writing direction.
+            // `.natural` would instead follow the *content's* base direction — so English text in
+            // an Arabic (RTL) app aligns LEFT (its natural direction) rather than RIGHT (the actual
+            // leading edge), and Arabic text in an English (LTR) app aligns RIGHT instead of LEFT.
+            return layoutDirection == .rightToLeft ? .right : .left
         case .center:
             return .center
         case .trailing:

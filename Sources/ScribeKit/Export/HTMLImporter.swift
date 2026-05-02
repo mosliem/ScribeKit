@@ -19,7 +19,15 @@ public struct HTMLImporter {
     ) -> NSAttributedString {
         guard !html.isEmpty else { return NSAttributedString() }
 
-        guard let data = html.data(using: .utf8) else { return NSAttributedString() }
+        // Convert <ul>/<ol>/<li> to <p>-with-prefix paragraphs BEFORE handing to the system
+        // HTML parser. The system parser converts list markup into NSTextList-based paragraph
+        // styles, which conflict with ScribeKit's text-prefix model and cause two failure modes:
+        //   1. Double bullets — NSTextList renders a bullet AND the text starts with "• "
+        //   2. Silent list loss — no text prefix means postProcessListMarkers misses the item,
+        //      the exporter emits <p> instead of <li>, and bullets vanish on the next reload.
+        let preprocessed = preprocessLists(in: html)
+
+        guard let data = preprocessed.data(using: .utf8) else { return NSAttributedString() }
 
         let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
             .documentType: NSAttributedString.DocumentType.html,
@@ -137,6 +145,76 @@ public struct HTMLImporter {
 
             location = paraRange.location + paraRange.length
         }
+    }
+
+    // MARK: - List Pre-Process
+
+    /// Converts `<ul>`, `<ol>`, and `<li>` markup into plain `<p>` paragraphs with
+    /// inline text-prefix markers before the string is handed to the system HTML parser.
+    private static func preprocessLists(in html: String) -> String {
+        var result = html
+        // Order matters: process more-specific patterns before generic <ul>.
+        result = replaceList(result, style: .numbered)
+        result = replaceList(result, style: .dash)    // <ul data-style="dash">
+        result = replaceList(result, style: .bullet)  // plain <ul>
+        return result
+    }
+
+    /// Finds all list blocks matching `style` and replaces each with `<p>marker content</p>` lines.
+    private static func replaceList(_ html: String, style: EditorListStyle) -> String {
+        // Build a pattern for the opening tag that is specific to each list style.
+        let openPattern: String
+        let closeTag: String
+        switch style {
+        case .numbered:
+            openPattern = #"<ol\b[^>]*>"#
+            closeTag = "</ol>"
+        case .dash:
+            // Only match <ul> that carries data-style="dash" (written by our exporter).
+            openPattern = #"<ul\b[^>]*\bdata-style="dash"[^>]*>"#
+            closeTag = "</ul>"
+        case .bullet:
+            // Match any <ul> that does NOT carry data-style (dash was already handled above).
+            openPattern = #"<ul\b(?![^>]*data-style)[^>]*>"#
+            closeTag = "</ul>"
+        }
+
+        let escapedClose = NSRegularExpression.escapedPattern(for: closeTag)
+        guard
+            let listRegex = try? NSRegularExpression(
+                pattern: "\(openPattern)([\\s\\S]*?)\(escapedClose)",
+                options: .caseInsensitive),
+            let liRegex = try? NSRegularExpression(
+                pattern: #"<li\b[^>]*>([\s\S]*?)</li>"#,
+                options: .caseInsensitive)
+        else { return html }
+
+        var result = html
+
+        // Replace one block per iteration; re-scan after each mutation so NSRange offsets stay valid.
+        while true {
+            let ns = result as NSString
+            guard
+                let match = listRegex.firstMatch(
+                    in: result, range: NSRange(location: 0, length: ns.length)),
+                match.range(at: 1).location != NSNotFound
+            else { break }
+
+            let innerContent = ns.substring(with: match.range(at: 1))
+            let nsInner = innerContent as NSString
+            let liMatches = liRegex.matches(
+                in: innerContent, range: NSRange(location: 0, length: nsInner.length))
+
+            let paragraphs: [String] = liMatches.enumerated().compactMap { index, m in
+                guard m.numberOfRanges >= 2, m.range(at: 1).location != NSNotFound else { return nil }
+                let content = nsInner.substring(with: m.range(at: 1))
+                return "<p>\(style.marker(forIndex: index + 1))\(content)</p>"
+            }
+
+            result = ns.replacingCharacters(in: match.range, with: paragraphs.joined(separator: "\n"))
+        }
+
+        return result
     }
 
     // MARK: - List Post-Process

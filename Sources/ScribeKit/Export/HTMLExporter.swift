@@ -44,21 +44,35 @@ public struct HTMLExporter {
             let alignment = (paraAttrs[.paragraphStyle] as? NSParagraphStyle)?.alignment ?? .natural
             let alignCSS = cssAlignment(for: alignment)
 
+            // Build a content range that excludes:
+            // 1. The trailing newline — paragraphRange(for:) always includes it, but if the
+            //    paragraph carries a foreground color the \n produces a spurious empty span
+            //    (e.g. <span style="color:#000000">\n</span>) at the end of every element.
+            // 2. For list items, the leading marker text ("• ", "- ", "1. " …) — if the marker
+            //    characters carry any attribute (e.g. color) they get wrapped in a <span>,
+            //    causing stripListMarker's plain-text hasPrefix check to silently fail and
+            //    the marker to leak into <li> content.  On the next import preprocessLists
+            //    prepends a second marker, doubling every bullet on each round-trip.
+            let markerUTF16 = editorListStyle.map { markerUTF16Length(for: $0, in: paraText) } ?? 0
+            let contentRange = NSRange(
+                location: paraRange.location + markerUTF16,
+                length: max(0, (paraText as NSString).length - markerUTF16)
+            )
+
             let innerHTML = buildInlineHTML(
                 for: paraText,
                 in: attributedString,
-                paragraphRange: paraRange,
+                paragraphRange: contentRange,
                 isHeadingParagraph: editorHeadingStyle != nil
             )
-            let cleanText = stripListMarker(from: innerHTML)
 
             if editorListStyle != nil {
-                html += "<li>\(cleanText)</li>\n"
+                html += "<li>\(innerHTML)</li>\n"
             } else if let heading = editorHeadingStyle {
-                html += "<\(heading.htmlTag)>\(cleanText)</\(heading.htmlTag)>\n"
+                html += "<\(heading.htmlTag)>\(innerHTML)</\(heading.htmlTag)>\n"
             } else {
                 let styleAttr = alignCSS.isEmpty ? "" : " style=\"text-align:\(alignCSS);\""
-                html += "<p\(styleAttr)>\(cleanText)</p>\n"
+                html += "<p\(styleAttr)>\(innerHTML)</p>\n"
             }
         }
 
@@ -172,21 +186,25 @@ public struct HTMLExporter {
         return result
     }
 
-    private static func stripListMarker(from html: String) -> String {
-        var result = html
-        for style in EditorListStyle.allCases {
-            switch style {
-            case .bullet:
-                if result.hasPrefix("• ") { result = String(result.dropFirst(2)) }
-            case .dash:
-                if result.hasPrefix("- ") { result = String(result.dropFirst(2)) }
-            case .numbered:
-                if let range = result.range(of: #"^\d+\. "#, options: .regularExpression) {
-                    result = String(result[range.upperBound...])
-                }
-            }
+    /// Returns the number of UTF-16 code units occupied by the list-marker prefix in `text`.
+    /// Returns 0 if `text` does not begin with the expected marker for `style`.
+    private static func markerUTF16Length(for style: EditorListStyle, in text: String) -> Int {
+        let ns = text as NSString
+        switch style {
+        case .bullet:
+            // "• " — U+2022 BULLET (BMP, 1 UTF-16 code unit) + SPACE
+            return text.hasPrefix("• ") ? 2 : 0
+        case .dash:
+            // "- " — HYPHEN-MINUS + SPACE
+            return text.hasPrefix("- ") ? 2 : 0
+        case .numbered:
+            // "N. " where N is one or more ASCII decimal digits
+            var i = 0
+            while i < ns.length && ns.character(at: i) >= 48 && ns.character(at: i) <= 57 { i += 1 }
+            guard i > 0, i + 1 < ns.length, ns.character(at: i) == 46, ns.character(at: i + 1) == 32
+            else { return 0 }
+            return i + 2
         }
-        return result
     }
 
     // MARK: - Color Helpers
@@ -224,8 +242,12 @@ public struct HTMLExporter {
 
     private static func openingTag(for style: EditorListStyle) -> String {
         switch style {
-        case .bullet, .dash:
+        case .bullet:
             return "<ul>\n"
+        case .dash:
+            // data-style attribute lets the importer distinguish dash from bullet on round-trip.
+            // Both map to <ul> in HTML but need separate treatment on re-import.
+            return "<ul data-style=\"dash\">\n"
         case .numbered:
             return "<ol>\n"
         }
