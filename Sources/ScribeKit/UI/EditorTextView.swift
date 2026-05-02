@@ -8,11 +8,20 @@ struct EditorTextView: UIViewRepresentable {
 
     let context: EditorContext
     let configuration: EditorConfiguration
+    /// Two-way binding kept in sync with the text view's first-responder state.
+    @Binding var isFocused: Bool
+    /// Cleared to `""` when the user makes any text change.
+    @Binding var errorMessage: String
 
     // MARK: - UIViewRepresentable
 
     func makeCoordinator() -> EditorCoordinator {
-        EditorCoordinator(context: context, configuration: configuration)
+        EditorCoordinator(
+            context: context,
+            configuration: configuration,
+            isFocused: $isFocused,
+            errorMessage: $errorMessage
+        )
     }
 
     func makeUIView(context representableContext: Context) -> UITextView {
@@ -77,6 +86,23 @@ struct EditorTextView: UIViewRepresentable {
         }
         if uiView.font != theme.editorFont {
             uiView.font = theme.editorFont
+        }
+
+        // Only dispatch a first-responder change when the desired focus state actually changes.
+        // Without this guard, every typing keystroke triggers updateUIView (via syncState()),
+        // and if isFocused is false (e.g. .constant(false)), each call would dispatch
+        // resignFirstResponder() — dismissing the keyboard after the first character typed.
+        let wantsFocus = isFocused
+        let coordinator = representableContext.coordinator
+        if coordinator.lastRequestedFocus != wantsFocus {
+            coordinator.lastRequestedFocus = wantsFocus
+            DispatchQueue.main.async {
+                if wantsFocus {
+                    if !uiView.isFirstResponder { uiView.becomeFirstResponder() }
+                } else {
+                    if uiView.isFirstResponder { uiView.resignFirstResponder() }
+                }
+            }
         }
 
         // Sync placeholder visibility.

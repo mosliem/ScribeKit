@@ -180,9 +180,10 @@ public struct HTMLImporter {
         }
 
         let escapedClose = NSRegularExpression.escapedPattern(for: closeTag)
+        // Capture the opening tag in group 1 so we can inspect its attributes (e.g. arabic-indic).
         guard
             let listRegex = try? NSRegularExpression(
-                pattern: "\(openPattern)([\\s\\S]*?)\(escapedClose)",
+                pattern: "(\(openPattern))([\\s\\S]*?)\(escapedClose)",
                 options: .caseInsensitive),
             let liRegex = try? NSRegularExpression(
                 pattern: #"<li\b[^>]*>([\s\S]*?)</li>"#,
@@ -197,18 +198,25 @@ public struct HTMLImporter {
             guard
                 let match = listRegex.firstMatch(
                     in: result, range: NSRange(location: 0, length: ns.length)),
-                match.range(at: 1).location != NSNotFound
+                match.range(at: 2).location != NSNotFound
             else { break }
 
-            let innerContent = ns.substring(with: match.range(at: 1))
+            // Group 1 = opening tag, group 2 = inner content
+            let openTagText = match.range(at: 1).location != NSNotFound
+                ? ns.substring(with: match.range(at: 1)) : ""
+            let innerContent = ns.substring(with: match.range(at: 2))
             let nsInner = innerContent as NSString
             let liMatches = liRegex.matches(
                 in: innerContent, range: NSRange(location: 0, length: nsInner.length))
 
+            // For numbered lists, use Arabic-Indic markers when the opening tag declares that style.
+            let useArabicNumerals = style == .numbered && openTagText.contains("arabic-indic")
+
             let paragraphs: [String] = liMatches.enumerated().compactMap { index, m in
                 guard m.numberOfRanges >= 2, m.range(at: 1).location != NSNotFound else { return nil }
                 let content = nsInner.substring(with: m.range(at: 1))
-                return "<p>\(style.marker(forIndex: index + 1))\(content)</p>"
+                let marker = style.marker(forIndex: index + 1, useArabicNumerals: useArabicNumerals)
+                return "<p>\(marker)\(content)</p>"
             }
 
             result = ns.replacingCharacters(in: match.range, with: paragraphs.joined(separator: "\n"))
@@ -240,7 +248,8 @@ public struct HTMLImporter {
                     value: EditorListStyle.dash.rawValue,
                     range: paraRange
                 )
-            } else if paraText.range(of: #"^\d+\. "#, options: .regularExpression) != nil {
+            } else if paraText.range(of: #"^\d+\. "#, options: .regularExpression) != nil
+                || paraText.range(of: "^[٠-٩]+\\. ", options: .regularExpression) != nil {
                 attrStr.addAttribute(
                     .scribeKitListStyle,
                     value: EditorListStyle.numbered.rawValue,

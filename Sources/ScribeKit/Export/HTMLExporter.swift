@@ -36,7 +36,10 @@ public struct HTMLExporter {
                     html += closingTag(for: current)
                 }
                 if let next = editorListStyle {
-                    html += openingTag(for: next)
+                    // Detect Arabic-Indic numerals from the first character of the paragraph text
+                    let isArabicIndic = next == .numbered &&
+                        (paraText.unicodeScalars.first.map { $0.value >= 0x0660 && $0.value <= 0x0669 } == true)
+                    html += openingTag(for: next, isArabicIndic: isArabicIndic)
                 }
                 currentListStyle = editorListStyle
             }
@@ -188,6 +191,7 @@ public struct HTMLExporter {
 
     /// Returns the number of UTF-16 code units occupied by the list-marker prefix in `text`.
     /// Returns 0 if `text` does not begin with the expected marker for `style`.
+    /// Handles both ASCII digits (`1. `) and Arabic-Indic digits (`١. `, U+0660–U+0669).
     private static func markerUTF16Length(for style: EditorListStyle, in text: String) -> Int {
         let ns = text as NSString
         switch style {
@@ -198,9 +202,17 @@ public struct HTMLExporter {
             // "- " — HYPHEN-MINUS + SPACE
             return text.hasPrefix("- ") ? 2 : 0
         case .numbered:
-            // "N. " where N is one or more ASCII decimal digits
+            // "N. " where N is one or more ASCII (48–57) or Arabic-Indic (U+0660–U+0669) decimal digits.
+            // Both code point ranges fit in the BMP so each digit occupies exactly 1 UTF-16 code unit.
             var i = 0
-            while i < ns.length && ns.character(at: i) >= 48 && ns.character(at: i) <= 57 { i += 1 }
+            while i < ns.length {
+                let c = ns.character(at: i)
+                if (c >= 48 && c <= 57) || (c >= 0x0660 && c <= 0x0669) {
+                    i += 1
+                } else {
+                    break
+                }
+            }
             guard i > 0, i + 1 < ns.length, ns.character(at: i) == 46, ns.character(at: i + 1) == 32
             else { return 0 }
             return i + 2
@@ -240,7 +252,7 @@ public struct HTMLExporter {
 
     // MARK: - Tag Helpers
 
-    private static func openingTag(for style: EditorListStyle) -> String {
+    private static func openingTag(for style: EditorListStyle, isArabicIndic: Bool = false) -> String {
         switch style {
         case .bullet:
             return "<ul>\n"
@@ -249,7 +261,8 @@ public struct HTMLExporter {
             // Both map to <ul> in HTML but need separate treatment on re-import.
             return "<ul data-style=\"dash\">\n"
         case .numbered:
-            return "<ol>\n"
+            // arabic-indic style attribute lets the importer restore the correct numeral script.
+            return isArabicIndic ? "<ol style=\"list-style-type: arabic-indic\">\n" : "<ol>\n"
         }
     }
 

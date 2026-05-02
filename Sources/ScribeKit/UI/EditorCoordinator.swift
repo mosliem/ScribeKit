@@ -1,4 +1,5 @@
 import UIKit
+import SwiftUI
 
 /// `@MainActor` UITextViewDelegate for the editor.
 /// Marked `@MainActor` so delegate methods call `context.syncState()` directly,
@@ -8,29 +9,53 @@ final class EditorCoordinator: NSObject, UITextViewDelegate {
     
     let context: EditorContext
     let configuration: EditorConfiguration
-    
+
+    /// Reflects whether the text view is currently the first responder.
+    /// Updated on every begin/end editing delegate callback.
+    @Binding var isFocused: Bool
+
+    /// Cleared to `""` as soon as the user makes any text change.
+    @Binding var errorMessage: String
+
     /// Placeholder label managed by EditorTextView; toggled on content changes.
     weak var placeholderLabel: UILabel?
-    
-    init(context: EditorContext, configuration: EditorConfiguration) {
+
+    /// Tracks the last `isFocused` value we acted on so `updateUIView` only dispatches a
+    /// first-responder change when the desired focus state actually changes — not on every
+    /// SwiftUI re-render triggered by typing.
+    var lastRequestedFocus: Bool = false
+
+    init(
+        context: EditorContext,
+        configuration: EditorConfiguration,
+        isFocused: Binding<Bool>,
+        errorMessage: Binding<String>
+    ) {
         self.context = context
         self.configuration = configuration
+        self._isFocused = isFocused
+        self._errorMessage = errorMessage
     }
     
     // MARK: - UITextViewDelegate
     
     func textViewDidChange(_ textView: UITextView) {
+        if !errorMessage.isEmpty {
+            errorMessage = ""
+        }
         context.syncState()
         syncPlaceholder(for: textView)
     }
     
     // Called when cursor appears (tap into editor) — syncs placeholder without waiting for typing
     func textViewDidBeginEditing(_ textView: UITextView) {
+        isFocused = true
         syncPlaceholder(for: textView)
     }
-    
+
     // Called when keyboard is dismissed — ensures placeholder is visible if content was cleared
     func textViewDidEndEditing(_ textView: UITextView) {
+        isFocused = false
         syncPlaceholder(for: textView)
     }
     

@@ -21,6 +21,26 @@ public enum EditorListStyle: String, Hashable, Sendable, CaseIterable, Identifia
             return "- "
         }
     }
+
+    /// Returns the text marker for a given index, optionally using Arabic-Indic numerals (U+0660–U+0669).
+    /// For `.bullet` and `.dash`, `useArabicNumerals` is ignored.
+    /// - Parameters:
+    ///   - index: The 1-based position of the list item.
+    ///   - useArabicNumerals: When `true` and the style is `.numbered`, returns e.g. `"١. "`.
+    public func marker(forIndex index: Int, useArabicNumerals: Bool) -> String {
+        guard case .numbered = self, useArabicNumerals else {
+            return marker(forIndex: index)
+        }
+        return "\(EditorListStyle.toArabicIndicDigits(index)). "
+    }
+
+    /// Converts a positive integer to its Arabic-Indic numeral representation (U+0660–U+0669).
+    private static func toArabicIndicDigits(_ number: Int) -> String {
+        String(number).map { ch -> Character in
+            let d = ch.wholeNumberValue ?? 0
+            return Character(UnicodeScalar(0x0660 + UInt32(d))!)
+        }.map(String.init).joined()
+    }
     
     /// The SF Symbol name used in the toolbar.
     public var symbolName: String {
