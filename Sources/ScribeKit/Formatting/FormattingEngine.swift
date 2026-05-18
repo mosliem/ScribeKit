@@ -53,11 +53,19 @@ public struct FormattingEngine {
     public static func setAlignment(_ alignment: RichTextAlignment, in textView: UITextView) {
         let storage = textView.textStorage
         let selectedRange = textView.selectedRange
-        let nsAlignment = alignment.toNSTextAlignment(
-            layoutDirection: textView.effectiveUserInterfaceLayoutDirection)
-        
+
         storage.beginEditing()
         let paragraphRange = (storage.string as NSString).paragraphRange(for: selectedRange)
+        // Resolve leading/trailing against the paragraph's own writing direction rather than the
+        // app's UI direction, so editing an English paragraph in an Arabic app (and vice versa)
+        // aligns relative to the content being edited.
+        let paragraphText = (storage.string as NSString).substring(with: paragraphRange)
+        let contentDirection = paragraphWritingDirection(
+            for: paragraphText,
+            fallback: textView.effectiveUserInterfaceLayoutDirection
+        )
+        let nsAlignment = alignment.toNSTextAlignment(layoutDirection: contentDirection)
+
         storage.enumerateAttribute(.paragraphStyle, in: paragraphRange, options: []) {
             value, range, _ in
             let style =
@@ -68,7 +76,7 @@ public struct FormattingEngine {
         }
         storage.endEditing()
     }
-    
+
     /// Detects the alignment at the cursor / start of the selection.
     public static func currentAlignment(in textView: UITextView) -> RichTextAlignment {
         let storage = textView.textStorage
@@ -76,7 +84,42 @@ public struct FormattingEngine {
         let location = min(textView.selectedRange.location, storage.length - 1)
         let attrs = storage.attributes(at: location, effectiveRange: nil)
         let nsAlignment = (attrs[.paragraphStyle] as? NSParagraphStyle)?.alignment ?? .natural
-        return RichTextAlignment(nsAlignment: nsAlignment, layoutDirection: textView.effectiveUserInterfaceLayoutDirection)
+
+        let paragraphRange = (storage.string as NSString).paragraphRange(for: textView.selectedRange)
+        let paragraphText = (storage.string as NSString).substring(with: paragraphRange)
+        let contentDirection = paragraphWritingDirection(
+            for: paragraphText,
+            fallback: textView.effectiveUserInterfaceLayoutDirection
+        )
+        return RichTextAlignment(nsAlignment: nsAlignment, layoutDirection: contentDirection)
+    }
+
+    /// Determines the dominant writing direction of a paragraph by scanning for the first
+    /// strong directional character. Falls back to the supplied direction when the paragraph
+    /// has no strong characters (empty, digits-only, punctuation-only).
+    private static func paragraphWritingDirection(
+        for text: String,
+        fallback: UIUserInterfaceLayoutDirection
+    ) -> UIUserInterfaceLayoutDirection {
+        for scalar in text.unicodeScalars {
+            let value = scalar.value
+            // Strong RTL: Hebrew, Arabic, Syriac, Thaana, NKo, Samaritan, Mandaic,
+            // Arabic Extended, and the Hebrew/Arabic presentation-forms blocks.
+            if (0x0590...0x08FF).contains(value)
+                || (0xFB1D...0xFDFF).contains(value)
+                || (0xFE70...0xFEFF).contains(value) {
+                return .rightToLeft
+            }
+            // Strong LTR: Latin, Latin Extended, Greek, Cyrillic, Armenian, and CJK.
+            if (0x0041...0x005A).contains(value)
+                || (0x0061...0x007A).contains(value)
+                || (0x00C0...0x024F).contains(value)
+                || (0x0370...0x058F).contains(value)
+                || (0x4E00...0x9FFF).contains(value) {
+                return .leftToRight
+            }
+        }
+        return fallback
     }
     
     /// Returns the active text styles at the cursor / in the selection.

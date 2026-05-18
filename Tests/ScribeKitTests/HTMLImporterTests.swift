@@ -3,6 +3,7 @@ import XCTest
 
 @testable import ScribeKit
 
+@MainActor
 final class HTMLImporterTests: XCTestCase {
     
     func testImport_EmptyHTML_ReturnsEmpty() {

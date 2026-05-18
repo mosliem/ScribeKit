@@ -4,6 +4,7 @@ import XCTest
 
 @testable import ScribeKit
 
+@MainActor
 final class HTMLExporterTests: XCTestCase {
     
     // MARK: - Basic
