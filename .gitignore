@@ -22,6 +22,6 @@ xcuserdata/
 
 # Claude Code
 .claude/
-
+.wolf
 # Logs
 *.log
