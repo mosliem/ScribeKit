@@ -80,12 +80,27 @@ struct EditorTextView: UIViewRepresentable {
         if uiView.backgroundColor != targetBg {
             uiView.backgroundColor = targetBg
         }
-        let targetText = UIColor(theme.editorTextColor)
-        if uiView.textColor != targetText {
-            uiView.textColor = targetText
+
+        // Font and textColor: only set when the editor is empty. Per Apple docs both
+        // properties "apply to the entire text string", so setting them when there is
+        // attributed content (from setContent or typing) would override per-character
+        // font/color attributes, causing imported HTML to lose its formatting until
+        // the user types (which uses typingAttributes from the text storage instead).
+        let hasContent = uiView.textStorage.length > 0
+        if !hasContent {
+            let targetText = UIColor(theme.editorTextColor)
+            if uiView.textColor != targetText {
+                uiView.textColor = targetText
+            }
+            if uiView.font != theme.editorFont {
+                uiView.font = theme.editorFont
+            }
         }
-        if uiView.font != theme.editorFont {
-            uiView.font = theme.editorFont
+
+        // Placeholder font always follows the theme (it's a separate UILabel)
+        let coordinator = representableContext.coordinator
+        if coordinator.placeholderLabel?.font != theme.editorFont {
+            coordinator.placeholderLabel?.font = theme.editorFont
         }
 
         // Only dispatch a first-responder change when the desired focus state actually changes.
@@ -93,7 +108,6 @@ struct EditorTextView: UIViewRepresentable {
         // and if isFocused is false (e.g. .constant(false)), each call would dispatch
         // resignFirstResponder() — dismissing the keyboard after the first character typed.
         let wantsFocus = isFocused
-        let coordinator = representableContext.coordinator
         if coordinator.lastRequestedFocus != wantsFocus {
             coordinator.lastRequestedFocus = wantsFocus
             DispatchQueue.main.async {
