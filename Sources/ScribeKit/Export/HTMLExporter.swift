@@ -186,7 +186,7 @@ public struct HTMLExporter {
             if !isHeadingParagraph,
                let runFont = font,
                runFont.pointSize != defaultBodySize {
-                wrapped = "<span style=\"font-size:\(Int(runFont.pointSize))pt\">\(wrapped)</span>"
+                wrapped = "<span style=\"font-size:\(Int(runFont.pointSize))px\">\(wrapped)</span>"
             }
 
             result += wrapped
