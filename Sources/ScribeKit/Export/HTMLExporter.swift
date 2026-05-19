@@ -70,7 +70,13 @@ public struct HTMLExporter {
             )
 
             if editorListStyle != nil {
-                html += "<li>\(innerHTML)</li>\n"
+                // Carry alignment onto the <li> itself so the round-trip preserves what the
+                // user set in the editor (previously dropped, leaving list items unaligned
+                // after reload). Add dir="rtl" for RTL content so the bullet/number marker
+                // renders on the correct visual edge regardless of the host page direction.
+                let styleAttr = alignCSS.isEmpty ? "" : " style=\"text-align:\(alignCSS);\""
+                let dirAttr = TextDirection.detect(in: paraText) == .rightToLeft ? " dir=\"rtl\"" : ""
+                html += "<li\(dirAttr)\(styleAttr)>\(innerHTML)</li>\n"
             } else if let heading = editorHeadingStyle {
                 html += "<\(heading.htmlTag)>\(innerHTML)</\(heading.htmlTag)>\n"
             } else {

@@ -15,6 +15,10 @@ struct ToolbarButtonView: View {
         } label: {
             Image(systemName: action.symbolName)
                 .font(.system(size: 16, weight: .medium))
+                // SF Symbols like text.alignleft/right mirror automatically in RTL locales,
+                // which flips the visual meaning of our absolute alignment buttons.
+                // Pin them so left always points left and right always points right.
+                .flipsForRightToLeftLayoutDirection(false)
                 .frame(width: 36, height: 36)
                 .foregroundStyle(isActive ? theme.toolbarActiveButtonColor : theme.toolbarButtonColor)
                 .background(

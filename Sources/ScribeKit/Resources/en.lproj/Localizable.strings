@@ -8,9 +8,9 @@
 "action.italic" = "Italic";
 "action.underline" = "Underline";
 "action.strikethrough" = "Strikethrough";
-"action.align_leading" = "Align leading";
+"action.align_left" = "Align left";
 "action.align_center" = "Align center";
-"action.align_trailing" = "Align trailing";
+"action.align_right" = "Align right";
 "action.bullet_list" = "Bullet list";
 "action.numbered_list" = "Numbered list";
 "action.dash_list" = "Dash list";

@@ -8,9 +8,9 @@
 "action.italic" = "مائل";
 "action.underline" = "تسطير";
 "action.strikethrough" = "يتوسطه خط";
-"action.align_leading" = "محاذاة للبداية";
+"action.align_left" = "محاذاة لليسار";
 "action.align_center" = "توسيط";
-"action.align_trailing" = "محاذاة للنهاية";
+"action.align_right" = "محاذاة لليمين";
 "action.bullet_list" = "قائمة نقطية";
 "action.numbered_list" = "قائمة مرقمة";
 "action.dash_list" = "قائمة بشرطات";

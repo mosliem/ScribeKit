@@ -9,10 +9,10 @@ public enum EditorToolbarAction: String, Hashable, Sendable, CaseIterable, Ident
     case underline
     case strikethrough
 
-    // Alignment
-    case alignLeading
+    // Alignment (absolute — never mirrored)
+    case alignLeft
     case alignCenter
-    case alignTrailing
+    case alignRight
 
     // Lists
     case bulletList
@@ -51,11 +51,11 @@ public enum EditorToolbarAction: String, Hashable, Sendable, CaseIterable, Ident
             return "underline"
         case .strikethrough:
             return "strikethrough"
-        case .alignLeading: 
+        case .alignLeft:
             return "text.alignleft"
-        case .alignCenter: 
+        case .alignCenter:
             return "text.aligncenter"
-        case .alignTrailing:
+        case .alignRight:
             return "text.alignright"
         case .bulletList: 
             return "list.bullet"
@@ -91,9 +91,9 @@ public enum EditorToolbarAction: String, Hashable, Sendable, CaseIterable, Ident
         case .italic:          return .localized("action.italic")
         case .underline:       return .localized("action.underline")
         case .strikethrough:   return .localized("action.strikethrough")
-        case .alignLeading:    return .localized("action.align_leading")
+        case .alignLeft:       return .localized("action.align_left")
         case .alignCenter:     return .localized("action.align_center")
-        case .alignTrailing:   return .localized("action.align_trailing")
+        case .alignRight:      return .localized("action.align_right")
         case .bulletList:      return .localized("action.bullet_list")
         case .numberedList:    return .localized("action.numbered_list")
         case .dashList:        return .localized("action.dash_list")

@@ -49,23 +49,25 @@ public struct FormattingEngine {
     
     // MARK: - Alignment
     
-    /// Sets the paragraph alignment for all paragraphs overlapping `range`.
+    /// Sets the paragraph alignment for all paragraphs overlapping the selection.
+    /// Applied as an absolute `NSTextAlignment`, so RTL/LTR context never silently swaps sides.
+    /// Also updates `typingAttributes` so the next character typed in an empty paragraph
+    /// inherits the alignment — without this, tapping an alignment button on an empty
+    /// editor has no visible effect because there are no paragraph-style runs to enumerate.
     public static func setAlignment(_ alignment: RichTextAlignment, in textView: UITextView) {
         let storage = textView.textStorage
         let selectedRange = textView.selectedRange
+        let nsAlignment = alignment.toNSTextAlignment()
+
+        var typingAttrs = textView.typingAttributes
+        let typingStyle = (typingAttrs[.paragraphStyle] as? NSParagraphStyle)?.mutableCopy()
+            as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
+        typingStyle.alignment = nsAlignment
+        typingAttrs[.paragraphStyle] = typingStyle
+        textView.typingAttributes = typingAttrs
 
         storage.beginEditing()
         let paragraphRange = (storage.string as NSString).paragraphRange(for: selectedRange)
-        // Resolve leading/trailing against the paragraph's own writing direction rather than the
-        // app's UI direction, so editing an English paragraph in an Arabic app (and vice versa)
-        // aligns relative to the content being edited.
-        let paragraphText = (storage.string as NSString).substring(with: paragraphRange)
-        let contentDirection = paragraphWritingDirection(
-            for: paragraphText,
-            fallback: textView.effectiveUserInterfaceLayoutDirection
-        )
-        let nsAlignment = alignment.toNSTextAlignment(layoutDirection: contentDirection)
-
         storage.enumerateAttribute(.paragraphStyle, in: paragraphRange, options: []) {
             value, range, _ in
             let style =
@@ -78,48 +80,18 @@ public struct FormattingEngine {
     }
 
     /// Detects the alignment at the cursor / start of the selection.
+    /// Falls back to `typingAttributes` when the editor is empty so the toolbar reflects
+    /// an alignment the user just chose, even before any character is typed.
     public static func currentAlignment(in textView: UITextView) -> RichTextAlignment {
         let storage = textView.textStorage
-        guard storage.length > 0 else { return .leading }
+        if storage.length == 0 {
+            let typingStyle = textView.typingAttributes[.paragraphStyle] as? NSParagraphStyle
+            return RichTextAlignment(nsAlignment: typingStyle?.alignment ?? .natural)
+        }
         let location = min(textView.selectedRange.location, storage.length - 1)
         let attrs = storage.attributes(at: location, effectiveRange: nil)
         let nsAlignment = (attrs[.paragraphStyle] as? NSParagraphStyle)?.alignment ?? .natural
-
-        let paragraphRange = (storage.string as NSString).paragraphRange(for: textView.selectedRange)
-        let paragraphText = (storage.string as NSString).substring(with: paragraphRange)
-        let contentDirection = paragraphWritingDirection(
-            for: paragraphText,
-            fallback: textView.effectiveUserInterfaceLayoutDirection
-        )
-        return RichTextAlignment(nsAlignment: nsAlignment, layoutDirection: contentDirection)
-    }
-
-    /// Determines the dominant writing direction of a paragraph by scanning for the first
-    /// strong directional character. Falls back to the supplied direction when the paragraph
-    /// has no strong characters (empty, digits-only, punctuation-only).
-    private static func paragraphWritingDirection(
-        for text: String,
-        fallback: UIUserInterfaceLayoutDirection
-    ) -> UIUserInterfaceLayoutDirection {
-        for scalar in text.unicodeScalars {
-            let value = scalar.value
-            // Strong RTL: Hebrew, Arabic, Syriac, Thaana, NKo, Samaritan, Mandaic,
-            // Arabic Extended, and the Hebrew/Arabic presentation-forms blocks.
-            if (0x0590...0x08FF).contains(value)
-                || (0xFB1D...0xFDFF).contains(value)
-                || (0xFE70...0xFEFF).contains(value) {
-                return .rightToLeft
-            }
-            // Strong LTR: Latin, Latin Extended, Greek, Cyrillic, Armenian, and CJK.
-            if (0x0041...0x005A).contains(value)
-                || (0x0061...0x007A).contains(value)
-                || (0x00C0...0x024F).contains(value)
-                || (0x0370...0x058F).contains(value)
-                || (0x4E00...0x9FFF).contains(value) {
-                return .leftToRight
-            }
-        }
-        return fallback
+        return RichTextAlignment(nsAlignment: nsAlignment)
     }
     
     /// Returns the active text styles at the cursor / in the selection.

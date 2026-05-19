@@ -181,12 +181,14 @@ public struct HTMLImporter {
 
         let escapedClose = NSRegularExpression.escapedPattern(for: closeTag)
         // Capture the opening tag in group 1 so we can inspect its attributes (e.g. arabic-indic).
+        // For <li>, capture its attribute span (group 1) and its content (group 2) so style
+        // and dir attributes survive the round-trip through the system HTML parser.
         guard
             let listRegex = try? NSRegularExpression(
                 pattern: "(\(openPattern))([\\s\\S]*?)\(escapedClose)",
                 options: .caseInsensitive),
             let liRegex = try? NSRegularExpression(
-                pattern: #"<li\b[^>]*>([\s\S]*?)</li>"#,
+                pattern: #"<li\b([^>]*)>([\s\S]*?)</li>"#,
                 options: .caseInsensitive)
         else { return html }
 
@@ -213,10 +215,17 @@ public struct HTMLImporter {
             let useArabicNumerals = style == .numbered && openTagText.contains("arabic-indic")
 
             let paragraphs: [String] = liMatches.enumerated().compactMap { index, m in
-                guard m.numberOfRanges >= 2, m.range(at: 1).location != NSNotFound else { return nil }
-                let content = nsInner.substring(with: m.range(at: 1))
+                guard
+                    m.numberOfRanges >= 3,
+                    m.range(at: 1).location != NSNotFound,
+                    m.range(at: 2).location != NSNotFound
+                else { return nil }
+                // Forward the <li>'s style/dir attributes onto the surrogate <p> so the
+                // system HTML parser keeps text-align and writing direction after import.
+                let liAttrs = nsInner.substring(with: m.range(at: 1))
+                let content = nsInner.substring(with: m.range(at: 2))
                 let marker = style.marker(forIndex: index + 1, useArabicNumerals: useArabicNumerals)
-                return "<p>\(marker)\(content)</p>"
+                return "<p\(liAttrs)>\(marker)\(content)</p>"
             }
 
             result = ns.replacingCharacters(in: match.range, with: paragraphs.joined(separator: "\n"))

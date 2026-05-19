@@ -31,6 +31,23 @@ public struct ListFormatter {
         // or when the paragraph content is predominantly Arabic.
         let useArabicNumerals = style == .numbered && isArabicInput(textView)
 
+        // Empty document: applyListing's loop is a no-op on a zero-length paragraph, so
+        // tapping a list button on an empty editor used to do nothing. Insert the marker
+        // here directly and update typing attributes so the next character continues the
+        // list with the editor's font (not the system parser's smaller fallback).
+        if !shouldRemove && storage.length == 0 {
+            let marker = style.marker(forIndex: 1, useArabicNumerals: useArabicNumerals)
+            var attrs = textView.typingAttributes
+            attrs[.scribeKitListStyle] = style.rawValue
+            attrs[.paragraphStyle] = indentedStyle()
+            storage.beginEditing()
+            storage.insert(NSAttributedString(string: marker, attributes: attrs), at: 0)
+            storage.endEditing()
+            textView.typingAttributes = attrs
+            textView.selectedRange = NSRange(location: marker.utf16.count, length: 0)
+            return
+        }
+
         storage.beginEditing()
 
         if shouldRemove {
@@ -40,7 +57,13 @@ public struct ListFormatter {
             if currentStyle != nil {
                 removeListing(from: storage, in: paragraphRange)
             }
-            applyListing(style, to: storage, in: paragraphRange, useArabicNumerals: useArabicNumerals)
+            applyListing(
+                style,
+                to: storage,
+                in: paragraphRange,
+                useArabicNumerals: useArabicNumerals,
+                fallbackAttrs: textView.typingAttributes
+            )
         }
 
         storage.endEditing()
@@ -217,7 +240,8 @@ public struct ListFormatter {
     
     private static func applyListing(
         _ style: EditorListStyle, to storage: NSMutableAttributedString, in range: NSRange,
-        useArabicNumerals: Bool = false
+        useArabicNumerals: Bool = false,
+        fallbackAttrs: [NSAttributedString.Key: Any] = [:]
     ) {
         var index = 0
         var location = range.location
@@ -241,23 +265,28 @@ public struct ListFormatter {
                         || paraText.range(of: "^[٠-٩]+\\. ", options: .regularExpression) != nil
                 }
             }()
-            
+
             if !alreadyHasMarker {
-                // Insert marker at the start of the paragraph
-                let markerAttrs: [NSAttributedString.Key: Any] = [
-                    .scribeKitListStyle: style.rawValue,
-                    .paragraphStyle: indentedStyle()
-                ]
+                // Inherit font / colour from the first character of the paragraph so the
+                // marker matches the surrounding text. Without this, the marker is inserted
+                // with no font attribute and renders in the system's default 12pt fallback —
+                // visibly smaller than the rest of the line (and the next list item, which
+                // copies attrs from the previous position in `handleEnter`).
+                var markerAttrs: [NSAttributedString.Key: Any] = paraRange.location < storage.length
+                    ? storage.attributes(at: paraRange.location, effectiveRange: nil)
+                    : fallbackAttrs
+                markerAttrs[.scribeKitListStyle] = style.rawValue
+                markerAttrs[.paragraphStyle] = indentedStyle()
                 let markerString = NSAttributedString(string: marker, attributes: markerAttrs)
                 storage.insert(markerString, at: paraRange.location)
             }
-            
+
             // Mark the whole paragraph with the list attribute
             let updatedNSString = storage.string as NSString
             let updatedParaRange = updatedNSString.paragraphRange(
                 for: NSRange(location: location, length: 0))
             storage.addAttribute(.scribeKitListStyle, value: style.rawValue, range: updatedParaRange)
-            
+
             location = updatedParaRange.location + updatedParaRange.length
         }
     }

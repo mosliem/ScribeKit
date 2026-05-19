@@ -17,9 +17,22 @@ public struct HeadingFormatter {
         let storage = textView.textStorage
         let selectedRange = textView.selectedRange
         let paragraphRange = (storage.string as NSString).paragraphRange(for: selectedRange)
-        
+
+        // Mirror the change into typing attributes so empty paragraphs / empty editors
+        // pick up the heading font as soon as the user starts typing.
+        var typingAttrs = textView.typingAttributes
+        let typingBase = (typingAttrs[.font] as? UIFont) ?? UIFont.systemFont(ofSize: defaultBodySize)
+        if let style {
+            typingAttrs[.font] = fontByApplyingHeadingSize(style.fontSize, to: typingBase, addingBold: true)
+            typingAttrs[.scribeKitHeadingStyle] = style.rawValue
+        } else {
+            typingAttrs[.font] = UIFont(descriptor: typingBase.fontDescriptor, size: defaultBodySize)
+            typingAttrs.removeValue(forKey: .scribeKitHeadingStyle)
+        }
+        textView.typingAttributes = typingAttrs
+
         storage.beginEditing()
-        
+
         if let style {
             // Apply heading: bold + heading font size + custom attribute
             storage.enumerateAttribute(.font, in: paragraphRange, options: []) { value, range, _ in
@@ -38,7 +51,7 @@ public struct HeadingFormatter {
             }
             storage.removeAttribute(.scribeKitHeadingStyle, range: paragraphRange)
         }
-        
+
         storage.endEditing()
     }
     

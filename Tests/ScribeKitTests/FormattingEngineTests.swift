@@ -54,41 +54,58 @@ final class FormattingEngineTests: XCTestCase {
         let textView = makeTextView()
         FormattingEngine.setAlignment(.center, in: textView)
         XCTAssertEqual(FormattingEngine.currentAlignment(in: textView), .center)
-        FormattingEngine.setAlignment(.trailing, in: textView)
-        XCTAssertEqual(FormattingEngine.currentAlignment(in: textView), .trailing)
+        FormattingEngine.setAlignment(.right, in: textView)
+        XCTAssertEqual(FormattingEngine.currentAlignment(in: textView), .right)
+        FormattingEngine.setAlignment(.left, in: textView)
+        XCTAssertEqual(FormattingEngine.currentAlignment(in: textView), .left)
     }
 
-    /// Alignment must follow the paragraph's content direction so editing an Arabic paragraph
-    /// in an LTR app (or English in an RTL app) aligns relative to the content, not the UI.
-    func testSetAlignment_FollowsContentDirection_ArabicInLTRView() {
+    /// Alignment is absolute — tapping "left" always produces `.left` regardless of whether the
+    /// paragraph contains Arabic, English, or anything else.
+    func testSetAlignment_IsAbsolute_ArabicContent() {
         let textView = makeTextView(text: "مرحبا بالعالم")
 
-        FormattingEngine.setAlignment(.leading, in: textView)
+        FormattingEngine.setAlignment(.left, in: textView)
         let storage = textView.textStorage
-        let style = storage.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle
-        XCTAssertEqual(style?.alignment, .right, "Arabic content's leading edge is the right side")
-        XCTAssertEqual(FormattingEngine.currentAlignment(in: textView), .leading)
+        let leftStyle = storage.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle
+        XCTAssertEqual(leftStyle?.alignment, .left)
+        XCTAssertEqual(FormattingEngine.currentAlignment(in: textView), .left)
 
-        FormattingEngine.setAlignment(.trailing, in: textView)
-        let trailingStyle = storage.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle
-        XCTAssertEqual(trailingStyle?.alignment, .left, "Arabic content's trailing edge is the left side")
-        XCTAssertEqual(FormattingEngine.currentAlignment(in: textView), .trailing)
+        FormattingEngine.setAlignment(.right, in: textView)
+        let rightStyle = storage.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle
+        XCTAssertEqual(rightStyle?.alignment, .right)
+        XCTAssertEqual(FormattingEngine.currentAlignment(in: textView), .right)
     }
 
-    func testSetAlignment_FollowsContentDirection_EnglishContent() {
+    func testSetAlignment_IsAbsolute_EnglishContent() {
         let textView = makeTextView(text: "Hello World")
 
-        FormattingEngine.setAlignment(.leading, in: textView)
+        FormattingEngine.setAlignment(.right, in: textView)
         let storage = textView.textStorage
         let style = storage.attribute(.paragraphStyle, at: 0, effectiveRange: nil) as? NSParagraphStyle
-        XCTAssertEqual(style?.alignment, .left, "English content's leading edge is the left side")
+        XCTAssertEqual(style?.alignment, .right, "Absolute alignment ignores content direction")
     }
 
-    func testSetAlignment_EmptyParagraph_FallsBackToViewDirection() {
+    /// On an empty editor, alignment must still land somewhere the next typed character
+    /// will pick up. Without writing into typingAttributes, the toolbar tap silently
+    /// no-ops because there are no paragraph-style runs to enumerate.
+    func testSetAlignment_EmptyEditor_WritesTypingAttributes() {
         let textView = makeTextView(text: "")
-        // No strong characters → falls back to the view's UI direction (LTR by default).
-        FormattingEngine.setAlignment(.leading, in: textView)
-        XCTAssertEqual(FormattingEngine.currentAlignment(in: textView), .leading)
+        FormattingEngine.setAlignment(.center, in: textView)
+        let style = textView.typingAttributes[.paragraphStyle] as? NSParagraphStyle
+        XCTAssertEqual(style?.alignment, .center)
+    }
+
+    /// The toolbar's active-button highlight reads `currentAlignment`. On an empty editor
+    /// it has to surface what the user just chose via typing attributes — otherwise the
+    /// button visibly stays on "left" even after tapping "center" / "right".
+    func testCurrentAlignment_EmptyEditor_ReflectsTypingAttributes() {
+        let textView = makeTextView(text: "")
+        FormattingEngine.setAlignment(.right, in: textView)
+        XCTAssertEqual(FormattingEngine.currentAlignment(in: textView), .right)
+
+        FormattingEngine.setAlignment(.center, in: textView)
+        XCTAssertEqual(FormattingEngine.currentAlignment(in: textView), .center)
     }
 
     func testAdjustFontSize() {

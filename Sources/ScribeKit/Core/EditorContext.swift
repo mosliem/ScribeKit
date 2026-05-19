@@ -15,7 +15,7 @@ public final class EditorContext {
     public private(set) var activeStyles: Set<TextStyle> = []
 
     /// The alignment of the current paragraph.
-    public private(set) var currentAlignment: RichTextAlignment = .leading
+    public private(set) var currentAlignment: RichTextAlignment = .left
 
     /// The list style of the current paragraph, or `nil` if not in a list.
     public private(set) var currentListStyle: EditorListStyle?

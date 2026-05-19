@@ -34,6 +34,36 @@ final class ListFormatterTests: XCTestCase {
         XCTAssertTrue(textView.textStorage.string.hasPrefix("- "))
     }
 
+    /// Tapping a list button on an empty editor must insert the marker (previously the
+    /// internal loop short-circuited on a zero-length paragraph and nothing happened).
+    func testToggleBulletList_EmptyEditor_InsertsMarker() {
+        let textView = makeTextView(text: "")
+        textView.font = UIFont.systemFont(ofSize: 18)
+        textView.typingAttributes = [.font: UIFont.systemFont(ofSize: 18)]
+
+        ListFormatter.toggleList(.bullet, in: textView)
+
+        XCTAssertEqual(textView.textStorage.string, "• ")
+        // The marker must inherit the editor's font, not fall back to the system 12pt default.
+        let markerFont = textView.textStorage.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
+        XCTAssertEqual(markerFont?.pointSize, 18, "Marker should use the textView's font, not the system default")
+    }
+
+    /// Regression for the "first item is tiny, second item is fine" report. The first
+    /// marker used to be inserted without any font attribute, so the system rendered it
+    /// at 12pt while the typed text used the editor's 18pt font.
+    func testToggleBulletList_FirstMarker_InheritsParagraphFont() {
+        let textView = makeTextView(text: "Hello")
+        // Give the existing paragraph an explicit font so we can assert it's copied onto the marker.
+        let para = NSRange(location: 0, length: 5)
+        textView.textStorage.addAttribute(.font, value: UIFont.systemFont(ofSize: 20), range: para)
+
+        ListFormatter.toggleList(.bullet, in: textView)
+
+        let markerFont = textView.textStorage.attribute(.font, at: 0, effectiveRange: nil) as? UIFont
+        XCTAssertEqual(markerFont?.pointSize, 20, "First marker font must match the paragraph's existing font")
+    }
+
     // MARK: - Toggle Off
 
     func testToggleBullet_Twice_RemovesMarker() {

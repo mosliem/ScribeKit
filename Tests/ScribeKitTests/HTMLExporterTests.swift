@@ -92,6 +92,43 @@ final class HTMLExporterTests: XCTestCase {
         XCTAssertTrue(result.contains("<ol>"))
         XCTAssertTrue(result.contains("<li>"))
     }
+
+    /// List items must carry the paragraph's alignment in the exported HTML. Previously
+    /// `<li>` was emitted without any style attribute, so reloading lost the alignment.
+    func testExport_AlignedListItem_EmitsTextAlignOnLi() {
+        let style = NSMutableParagraphStyle()
+        style.alignment = .right
+        let attrs: [NSAttributedString.Key: Any] = [
+            .scribeKitListStyle: EditorListStyle.bullet.rawValue,
+            .paragraphStyle: style
+        ]
+        let attrStr = NSAttributedString(string: "• Item", attributes: attrs)
+        let result = HTMLExporter.export(attrStr)
+        XCTAssertTrue(
+            result.contains("<li") && result.contains("text-align:right"),
+            "Expected <li ... style=\"text-align:right\"> in: \(result)"
+        )
+    }
+
+    /// Arabic content in a list must be marked with dir="rtl" so the bullet/number marker
+    /// renders on the visual right edge regardless of the host document direction.
+    func testExport_ArabicListItem_EmitsDirRTL() {
+        let attrs: [NSAttributedString.Key: Any] = [
+            .scribeKitListStyle: EditorListStyle.bullet.rawValue
+        ]
+        let attrStr = NSAttributedString(string: "• مرحبا", attributes: attrs)
+        let result = HTMLExporter.export(attrStr)
+        XCTAssertTrue(result.contains("dir=\"rtl\""), "Expected dir=\"rtl\" in: \(result)")
+    }
+
+    func testExport_EnglishListItem_DoesNotEmitDir() {
+        let attrs: [NSAttributedString.Key: Any] = [
+            .scribeKitListStyle: EditorListStyle.bullet.rawValue
+        ]
+        let attrStr = NSAttributedString(string: "• Hello", attributes: attrs)
+        let result = HTMLExporter.export(attrStr)
+        XCTAssertFalse(result.contains("dir=\"rtl\""), "LTR content should not carry dir=\"rtl\": \(result)")
+    }
     
     // MARK: - R1: Double-quote escaping in href
     

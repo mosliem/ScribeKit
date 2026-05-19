@@ -162,12 +162,12 @@ struct EditorToolbar: View {
             return context.activeStyles.contains(.underline)
         case .strikethrough:
             return context.activeStyles.contains(.strikethrough)
-        case .alignLeading:
-            return context.currentAlignment == .leading
+        case .alignLeft:
+            return context.currentAlignment == .left
         case .alignCenter:
             return context.currentAlignment == .center
-        case .alignTrailing:
-            return context.currentAlignment == .trailing
+        case .alignRight:
+            return context.currentAlignment == .right
         case .bulletList:
             return context.currentListStyle == .bullet
         case .numberedList:
@@ -199,12 +199,12 @@ struct EditorToolbar: View {
             context.toggleStyle(.underline)
         case .strikethrough:
             context.toggleStyle(.strikethrough)
-        case .alignLeading:
-            context.setAlignment(.leading)
+        case .alignLeft:
+            context.setAlignment(.left)
         case .alignCenter:
-            context.setAlignment(context.currentAlignment == .center ? .leading : .center)
-        case .alignTrailing:
-            context.setAlignment(context.currentAlignment == .trailing ? .leading : .trailing)
+            context.setAlignment(.center)
+        case .alignRight:
+            context.setAlignment(.right)
         case .bulletList:
             context.toggleList(.bullet)
         case .numberedList:

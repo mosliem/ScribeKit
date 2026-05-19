@@ -30,7 +30,7 @@ public struct ToolbarConfiguration: Sendable {
 
         ToolbarGroup(id: "lists", actions: [.bulletList, .numberedList, .dashList]),
 
-        ToolbarGroup(id: "alignment", actions: [.alignLeading, .alignCenter, .alignTrailing]),
+        ToolbarGroup(id: "alignment", actions: [.alignLeft, .alignCenter, .alignRight]),
 
         ToolbarGroup(id: "styles", actions: [.bold, .italic, .underline, .strikethrough]),
 
