@@ -102,12 +102,14 @@ public struct ScribeEditor: View {
                     .stroke(activeBorderColor, lineWidth: 1)
             )
 
-            if !errorMessage.isEmpty {
-                Text(errorMessage)
-                    .font(Font(theme.editorFont.withSize(UIFont.preferredFont(forTextStyle: .caption1).pointSize)))
-                    .foregroundStyle(Color.red)
-                    .padding(.horizontal, 4)
-            }
+            // Always reserve the error row's height (rendered but invisible when empty) so the
+            // editor field above keeps a constant height whether an error is shown or dismissed.
+            Text(errorMessage.isEmpty ? " " : errorMessage)
+                .font(Font(theme.editorFont.withSize(UIFont.preferredFont(forTextStyle: .caption1).pointSize)))
+                .foregroundStyle(Color.red)
+                .padding(.horizontal, 4)
+                .opacity(errorMessage.isEmpty ? 0 : 1)
+                .accessibilityHidden(errorMessage.isEmpty)
         }
         // Single sheet managed by the EditorSheet enum — no multiple boolean flags
         .sheet(item: $context.activeSheet) { sheet in
