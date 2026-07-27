@@ -12,7 +12,13 @@ public struct HTMLExporter {
     /// Call this explicitly — do not use as a computed property — to avoid triggering
     /// expensive HTML generation during SwiftUI view-body evaluation.
     public static func export(_ attributedString: NSAttributedString) -> String {
-        guard attributedString.length > 0 else { return "" }
+        // Return "" for content with no visible characters — a truly empty string, or a lone
+        // empty/whitespace paragraph. Without this, a styled-but-empty paragraph exports as
+        // stray markup (e.g. <p style="text-align:center;"></p>). Keeps export symmetric with
+        // HTMLImporter, which collapses the same empty representations to an empty string.
+        guard !attributedString.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return ""
+        }
 
         var html = ""
         var currentListStyle: EditorListStyle?

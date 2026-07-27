@@ -13,6 +13,30 @@ final class HTMLExporterTests: XCTestCase {
         let result = HTMLExporter.export(NSAttributedString())
         XCTAssertEqual(result, "")
     }
+
+    /// Content with no visible characters — a lone empty/whitespace paragraph, even one
+    /// carrying paragraph attributes like alignment or a heading — must export to "",
+    /// not stray markup such as `<p style="text-align:center;"></p>`.
+    func testExport_EmptyStyledParagraph_ReturnsEmpty() {
+        // Lone newline
+        XCTAssertEqual(HTMLExporter.export(NSAttributedString(string: "\n")), "")
+
+        // Whitespace only
+        XCTAssertEqual(HTMLExporter.export(NSAttributedString(string: "   ")), "")
+
+        // Empty paragraph carrying a centered paragraph style
+        let centered = NSMutableParagraphStyle()
+        centered.alignment = .center
+        let styled = NSAttributedString(string: "\n", attributes: [.paragraphStyle: centered])
+        XCTAssertEqual(HTMLExporter.export(styled), "")
+
+        // Empty paragraph carrying a heading attribute
+        let heading = NSAttributedString(
+            string: "\n",
+            attributes: [.scribeKitHeadingStyle: EditorHeadingStyle.heading1.rawValue]
+        )
+        XCTAssertEqual(HTMLExporter.export(heading), "")
+    }
     
     func testExport_PlainText_WrapsInParagraph() {
         let result = HTMLExporter.export(NSAttributedString(string: "Hello"))
