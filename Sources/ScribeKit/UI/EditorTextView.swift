@@ -5,12 +5,23 @@ import UIKit
 struct EditorTextView: UIViewRepresentable {
 
     @Environment(\.editorTheme) private var theme
-    /// The SwiftUI layout direction of the host app. The text view uses
-    /// `semanticContentAttribute = .unspecified`, which drops SwiftUI's RTL signal, so the
-    /// placeholder label must derive its alignment from this value explicitly.
+    /// SwiftUI's layout direction. Note: this is not reliably propagated into a
+    /// `UIViewRepresentable`, so it's only a fallback — `resolvedIsRTL(for:)` primarily uses
+    /// the text view's own `effectiveUserInterfaceLayoutDirection`.
     @Environment(\.layoutDirection) private var layoutDirection
 
     let context: EditorContext
+
+    /// Resolves whether the editor should lay out right-to-left. The text view sets
+    /// `semanticContentAttribute = .unspecified`, so its `effectiveUserInterfaceLayoutDirection`
+    /// resolves against the real (UIKit) RTL context — reliable where SwiftUI's `layoutDirection`
+    /// environment is not inside a representable. The SwiftUI value is kept as a fallback for
+    /// apps that force RTL purely via `.environment(\.layoutDirection, .rightToLeft)`.
+    private func resolvedIsRTL(for view: UIView) -> Bool {
+        view.effectiveUserInterfaceLayoutDirection == .rightToLeft
+            || layoutDirection == .rightToLeft
+            || UIView.userInterfaceLayoutDirection(for: .unspecified) == .rightToLeft
+    }
     let configuration: EditorConfiguration
     /// Two-way binding kept in sync with the text view's first-responder state.
     @Binding var isFocused: Bool
@@ -49,21 +60,25 @@ struct EditorTextView: UIViewRepresentable {
         placeholderLabel.font = theme.editorFont
         placeholderLabel.textColor = UIColor.placeholderText
         placeholderLabel.numberOfLines = 0
-        // Align the placeholder to match the host app's writing direction. `.natural` would
-        // resolve against UIKit's layout direction, not SwiftUI's, because the text view uses
-        // `semanticContentAttribute = .unspecified` — so set it explicitly from layoutDirection.
-        placeholderLabel.textAlignment = layoutDirection == .rightToLeft ? .right : .left
+        // Align the placeholder to match the host app's writing direction (see resolvedIsRTL).
+        placeholderLabel.textAlignment = resolvedIsRTL(for: textView) ? .right : .left
         placeholderLabel.translatesAutoresizingMaskIntoConstraints = false
         textView.addSubview(placeholderLabel)
 
         let insets = textView.textContainerInset
         let lineFragmentPadding = textView.textContainer.lineFragmentPadding
+        // Pin to the scroll view's frameLayoutGuide with ABSOLUTE left/right anchors so the label
+        // is always full width and stays put under RTL. Leading/trailing anchors flip with
+        // semanticContentAttribute — which SwiftUI mutates to forceRightToLeft AFTER makeUIView —
+        // which previously left the label content-width-sized on the wrong (left) edge. The text
+        // direction itself is handled by textAlignment (see resolvedIsRTL).
+        let guide = textView.frameLayoutGuide
         NSLayoutConstraint.activate([
-            placeholderLabel.topAnchor.constraint(equalTo: textView.topAnchor, constant: insets.top),
-            placeholderLabel.leadingAnchor.constraint(
-                equalTo: textView.leadingAnchor, constant: insets.left + lineFragmentPadding),
-            placeholderLabel.trailingAnchor.constraint(
-                equalTo: textView.trailingAnchor, constant: -(insets.right + lineFragmentPadding))
+            placeholderLabel.topAnchor.constraint(equalTo: guide.topAnchor, constant: insets.top),
+            placeholderLabel.leftAnchor.constraint(
+                equalTo: guide.leftAnchor, constant: insets.left + lineFragmentPadding),
+            placeholderLabel.rightAnchor.constraint(
+                equalTo: guide.rightAnchor, constant: -(insets.right + lineFragmentPadding))
         ])
 
         placeholderLabel.isHidden = !textView.textStorage.string.isEmpty
@@ -114,7 +129,7 @@ struct EditorTextView: UIViewRepresentable {
         }
 
         // Keep the placeholder alignment in sync with the host app's writing direction.
-        let placeholderAlignment: NSTextAlignment = layoutDirection == .rightToLeft ? .right : .left
+        let placeholderAlignment: NSTextAlignment = resolvedIsRTL(for: uiView) ? .right : .left
         if coordinator.placeholderLabel?.textAlignment != placeholderAlignment {
             coordinator.placeholderLabel?.textAlignment = placeholderAlignment
         }
