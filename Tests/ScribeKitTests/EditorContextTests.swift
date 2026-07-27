@@ -110,6 +110,29 @@ final class EditorContextTests: XCTestCase {
         )
     }
 
+    /// The coordinator must report focus into whatever binding it holds — in `ScribeEditor`
+    /// that binding writes an internal `@State`, which is what drives the active border color.
+    /// Regression: previously the active border read the external `isFocused` binding, which is
+    /// `.constant(false)` for callers that don't track focus, so it never reflected focus.
+    func testCoordinatorReportsFocusIntoBinding() {
+        let context = EditorContext()
+        let textView = UITextView()
+        context.textView = textView
+        var focused = false
+        let coordinator = EditorCoordinator(
+            context: context,
+            configuration: .default,
+            isFocused: Binding(get: { focused }, set: { focused = $0 }),
+            errorMessage: .constant("")
+        )
+
+        coordinator.textViewDidBeginEditing(textView)
+        XCTAssertTrue(focused, "Begin editing should report focus = true")
+
+        coordinator.textViewDidEndEditing(textView)
+        XCTAssertFalse(focused, "End editing should report focus = false")
+    }
+
     /// A pure selection/cursor change must not re-export `html`.
     func testSelectionChangeDoesNotReexportHTML() async throws {
         let textView = UITextView()

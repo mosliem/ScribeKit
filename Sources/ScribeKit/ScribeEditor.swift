@@ -27,6 +27,23 @@ public struct ScribeEditor: View {
 
     @Environment(\.editorTheme) private var theme
 
+    /// Internal, always-live focus state. The public `isFocused` binding may be
+    /// `.constant(false)` (when the caller doesn't track focus), which would discard the
+    /// coordinator's focus updates — so the active border must read this instead.
+    @State private var isFocusedInternal = false
+
+    /// Bridges the coordinator's focus reporting to both the internal state (which drives the
+    /// active border) and the external binding (for callers that track focus).
+    private var focusBinding: Binding<Bool> {
+        Binding(
+            get: { isFocused || isFocusedInternal },
+            set: { newValue in
+                if isFocusedInternal != newValue { isFocusedInternal = newValue }
+                if isFocused != newValue { isFocused = newValue }
+            }
+        )
+    }
+
     /// Use when focus is tracked with a plain `@State var isFocused: Bool`.
     public init(
         context: EditorContext,
@@ -72,7 +89,7 @@ public struct ScribeEditor: View {
 
                 Divider()
 
-                EditorTextView(context: context, configuration: configuration, isFocused: $isFocused, errorMessage: $errorMessage)
+                EditorTextView(context: context, configuration: configuration, isFocused: focusBinding, errorMessage: $errorMessage)
 
                 if configuration.showsWordCount {
                     Divider()
@@ -122,7 +139,7 @@ public struct ScribeEditor: View {
             return .red
         }
 
-        if isFocused {
+        if isFocusedInternal {
             return theme.activeBorderColor ?? theme.borderColor
         }
 
