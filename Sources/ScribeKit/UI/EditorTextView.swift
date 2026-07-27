@@ -5,6 +5,10 @@ import UIKit
 struct EditorTextView: UIViewRepresentable {
 
     @Environment(\.editorTheme) private var theme
+    /// The SwiftUI layout direction of the host app. The text view uses
+    /// `semanticContentAttribute = .unspecified`, which drops SwiftUI's RTL signal, so the
+    /// placeholder label must derive its alignment from this value explicitly.
+    @Environment(\.layoutDirection) private var layoutDirection
 
     let context: EditorContext
     let configuration: EditorConfiguration
@@ -45,6 +49,10 @@ struct EditorTextView: UIViewRepresentable {
         placeholderLabel.font = theme.editorFont
         placeholderLabel.textColor = UIColor.placeholderText
         placeholderLabel.numberOfLines = 0
+        // Align the placeholder to match the host app's writing direction. `.natural` would
+        // resolve against UIKit's layout direction, not SwiftUI's, because the text view uses
+        // `semanticContentAttribute = .unspecified` — so set it explicitly from layoutDirection.
+        placeholderLabel.textAlignment = layoutDirection == .rightToLeft ? .right : .left
         placeholderLabel.translatesAutoresizingMaskIntoConstraints = false
         textView.addSubview(placeholderLabel)
 
@@ -103,6 +111,12 @@ struct EditorTextView: UIViewRepresentable {
         let coordinator = representableContext.coordinator
         if coordinator.placeholderLabel?.font != theme.editorFont {
             coordinator.placeholderLabel?.font = theme.editorFont
+        }
+
+        // Keep the placeholder alignment in sync with the host app's writing direction.
+        let placeholderAlignment: NSTextAlignment = layoutDirection == .rightToLeft ? .right : .left
+        if coordinator.placeholderLabel?.textAlignment != placeholderAlignment {
+            coordinator.placeholderLabel?.textAlignment = placeholderAlignment
         }
 
         // Only dispatch a first-responder change when the desired focus state actually changes.
