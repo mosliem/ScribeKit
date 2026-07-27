@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// The main public rich text editor view.
 /// Compose this into your app and supply an `EditorContext` instance.
@@ -86,7 +87,7 @@ public struct ScribeEditor: View {
 
             if !errorMessage.isEmpty {
                 Text(errorMessage)
-                    .font(.caption)
+                    .font(Font(theme.editorFont.withSize(UIFont.preferredFont(forTextStyle: .caption1).pointSize)))
                     .foregroundStyle(Color.red)
                     .padding(.horizontal, 4)
             }
