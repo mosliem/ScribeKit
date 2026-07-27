@@ -123,7 +123,7 @@ public struct ScribeEditor: View {
         }
 
         if isFocused {
-            return theme.toolbarActiveButtonColor
+            return theme.activeBorderColor ?? theme.borderColor
         }
 
         return theme.borderColor

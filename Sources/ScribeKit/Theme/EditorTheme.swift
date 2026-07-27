@@ -18,7 +18,18 @@ public protocol EditorTheme {
 
     var borderColor: Color { get }
 
+    /// The border color shown while the editor is focused. Return `nil` to fall back to
+    /// `borderColor` (no distinct focus highlight). Defaults to a light grey.
+    var activeBorderColor: Color? { get }
+
     var cornerRadius: CGFloat { get }
+}
+
+// MARK: - Defaults
+
+public extension EditorTheme {
+    /// Default active (focused) border color — a light grey. Themes may override or return `nil`.
+    var activeBorderColor: Color? { Color(.lightGray) }
 }
 
 // MARK: - Environment Key
