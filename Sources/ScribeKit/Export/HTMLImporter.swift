@@ -41,6 +41,14 @@ public struct HTMLImporter {
             return NSAttributedString(string: html)
         }
 
+        // Markup that represents an empty document — e.g. `<p></p>`, `<br>`, `<p><br></p>`,
+        // which a browser `contenteditable` emits for an empty field — parses to a stray
+        // newline/whitespace. Treat it as truly empty so setContent(html:) with an empty
+        // value doesn't insert a blank line into the editor.
+        if attributed.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return NSAttributedString()
+        }
+
         // Pre-scan: collect heading positions from the raw HTML before the system parser normalises it.
         let headings = extractHeadings(from: html)
 

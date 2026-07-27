@@ -10,6 +10,15 @@ final class HTMLImporterTests: XCTestCase {
         let result = HTMLImporter.import(html: "")
         XCTAssertEqual(result.length, 0)
     }
+
+    /// Markup representing an empty document (as a browser `contenteditable` emits for an
+    /// empty field) must import to a truly empty string — not a stray blank line.
+    func testImport_EmptyDocumentMarkup_ReturnsEmpty() {
+        for markup in ["<p></p>", "<br>", "<p><br></p>", "<p>&nbsp;</p>", "   "] {
+            let result = HTMLImporter.import(html: markup)
+            XCTAssertEqual(result.length, 0, "Expected empty result for \(markup.debugDescription)")
+        }
+    }
     
     func testImport_PlainParagraph() {
         let result = HTMLImporter.import(html: "<p>Hello World</p>")
