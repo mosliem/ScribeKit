@@ -43,7 +43,7 @@ final class EditorCoordinator: NSObject, UITextViewDelegate {
         if !errorMessage.isEmpty {
             errorMessage = ""
         }
-        context.syncState()
+        context.contentDidChange()
         syncPlaceholder(for: textView)
     }
     

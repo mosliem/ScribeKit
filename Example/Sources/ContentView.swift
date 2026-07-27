@@ -76,6 +76,9 @@ struct BasicEditorView: View {
             .sheet(isPresented: $showHTML) {
                 HTMLPreviewSheet(html: exportedHTML)
             }
+            .onChange(of: context.html) { oldValue, newValue in
+                print(newValue)
+            }
         }
     }
 }

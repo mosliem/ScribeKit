@@ -63,6 +63,7 @@ struct EditorTextView: UIViewRepresentable {
         // Store references in context so programmatic edits can sync the placeholder directly
         context.textView = textView
         context.coordinator = representableContext.coordinator
+        context.htmlDebounceInterval = configuration.htmlDebounceInterval
 
         // Store coordinator reference so it can toggle the placeholder from delegate callbacks
         representableContext.coordinator.placeholderLabel = placeholderLabel
@@ -73,6 +74,7 @@ struct EditorTextView: UIViewRepresentable {
     func updateUIView(_ uiView: UITextView, context representableContext: Context) {
         // Sync config/theme changes at runtime
         (uiView as? ScribeTextView)?.configuration = configuration
+        context.htmlDebounceInterval = configuration.htmlDebounceInterval
         if uiView.isEditable != configuration.isEditable {
             uiView.isEditable = configuration.isEditable
         }

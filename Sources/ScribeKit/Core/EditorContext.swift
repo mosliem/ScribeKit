@@ -42,6 +42,16 @@ public final class EditorContext {
     /// Live word count.
     public private(set) var wordCount: Int = 0
 
+    /// The editor's current content serialized as HTML.
+    /// Refreshed on every content mutation (typing, paste, delete, programmatic
+    /// `setContent`, and formatting) after a short debounce; NOT refreshed on
+    /// cursor/selection movement. Observe it directly to receive the new value:
+    /// ```swift
+    /// .onChange(of: context.html) { _, newHTML in ... }
+    /// ```
+    /// For a synchronous, un-debounced snapshot use `exportHTML()` instead.
+    public private(set) var html: String = ""
+
     /// The active sheet being presented (link input, image picker), or `nil`.
     public internal(set) var activeSheet: EditorSheet?
 
@@ -53,6 +63,14 @@ public final class EditorContext {
     /// Direct reference to the coordinator so we can sync the placeholder immediately
     /// after programmatic content changes.
     weak var coordinator: EditorCoordinator?
+
+    /// Debounce delay for re-exporting `html`. Mirrors `EditorConfiguration.htmlDebounceInterval`;
+    /// set by `EditorTextView` during wiring. `@ObservationIgnored` — changing it must not
+    /// invalidate observers.
+    @ObservationIgnored var htmlDebounceInterval: Duration = .milliseconds(300)
+
+    /// The in-flight debounced HTML export. Cancelled and restarted on each interactive edit.
+    @ObservationIgnored private var htmlExportTask: Task<Void, Never>?
 
     // MARK: - Computed (on-demand, no copy on every keystroke)
 
@@ -79,7 +97,7 @@ public final class EditorContext {
         textView.textStorage.beginEditing()
         textView.textStorage.setAttributedString(imported)
         textView.textStorage.endEditing()
-        syncState()
+        contentDidChange(immediate: true)
         coordinator?.syncPlaceholder(for: textView)
     }
 
@@ -89,7 +107,7 @@ public final class EditorContext {
         textView.textStorage.beginEditing()
         textView.textStorage.setAttributedString(attributedString)
         textView.textStorage.endEditing()
-        syncState()
+        contentDidChange(immediate: true)
         coordinator?.syncPlaceholder(for: textView)
     }
 
@@ -106,21 +124,21 @@ public final class EditorContext {
     public func toggleStyle(_ style: TextStyle) {
         guard let textView else { return }
         FormattingEngine.toggleStyle(style, in: textView)
-        syncState()
+        contentDidChange()
     }
 
     /// Sets the paragraph alignment.
     public func setAlignment(_ alignment: RichTextAlignment) {
         guard let textView else { return }
         FormattingEngine.setAlignment(alignment, in: textView)
-        syncState()
+        contentDidChange()
     }
 
     /// Toggles the given list style on the current selection.
     public func toggleList(_ style: EditorListStyle) {
         guard let textView else { return }
         ListFormatter.toggleList(style, in: textView)
-        syncState()
+        contentDidChange()
     }
 
     // MARK: - Heading Actions
@@ -131,7 +149,7 @@ public final class EditorContext {
         guard let textView else { return }
         let resolved = (style == currentHeadingStyle) ? nil : style
         HeadingFormatter.setHeading(resolved, in: textView)
-        syncState()
+        contentDidChange()
     }
 
     // MARK: - Font Size Actions
@@ -140,14 +158,14 @@ public final class EditorContext {
     public func increaseFontSize() {
         guard let textView else { return }
         FormattingEngine.adjustFontSize(by: 2, in: textView)
-        syncState()
+        contentDidChange()
     }
 
     /// Decreases font size by 2pt.
     public func decreaseFontSize() {
         guard let textView else { return }
         FormattingEngine.adjustFontSize(by: -2, in: textView)
-        syncState()
+        contentDidChange()
     }
 
     // MARK: - Color Actions
@@ -156,21 +174,21 @@ public final class EditorContext {
     public func setForegroundColor(_ color: Color) {
         guard let textView else { return }
         ColorFormatter.setForegroundColor(UIColor(color), in: textView)
-        syncState()
+        contentDidChange()
     }
 
     /// Removes the foreground (text) color, reverting to the default label color.
     public func resetForegroundColor() {
         guard let textView else { return }
         ColorFormatter.removeForegroundColor(in: textView)
-        syncState()
+        contentDidChange()
     }
 
     /// Sets or removes the background (highlight) color at the current selection.
     public func setHighlightColor(_ color: Color?) {
         guard let textView else { return }
         ColorFormatter.setBackgroundColor(color.map(UIColor.init), in: textView)
-        syncState()
+        contentDidChange()
     }
 
     // MARK: - Indent Actions
@@ -179,14 +197,14 @@ public final class EditorContext {
     public func increaseIndent() {
         guard let textView else { return }
         IndentFormatter.increaseIndent(in: textView)
-        syncState()
+        contentDidChange()
     }
 
     /// Decreases indentation by one step.
     public func decreaseIndent() {
         guard let textView else { return }
         IndentFormatter.decreaseIndent(in: textView)
-        syncState()
+        contentDidChange()
     }
 
     // MARK: - Link Actions
@@ -203,7 +221,7 @@ public final class EditorContext {
     public func commitLink(url: String, displayText: String) {
         guard let textView else { return }
         LinkFormatter.insertLink(url: url, displayText: displayText, in: textView)
-        syncState()
+        contentDidChange()
         coordinator?.syncPlaceholder(for: textView)
     }
 
@@ -211,7 +229,7 @@ public final class EditorContext {
     public func removeLink() {
         guard let textView else { return }
         LinkFormatter.removeLink(in: textView)
-        syncState()
+        contentDidChange()
     }
 
     // MARK: - Image Actions
@@ -230,8 +248,40 @@ public final class EditorContext {
     public func commitImage(data: Data) {
         guard let textView else { return }
         ImageFormatter.insertImage(data: data, in: textView)
-        syncState()
+        contentDidChange()
         coordinator?.syncPlaceholder(for: textView)
+    }
+
+    // MARK: - Content Change Notification
+
+    /// Signals that the attributed content was mutated: resyncs toolbar state immediately,
+    /// then refreshes the observable `html` value.
+    ///
+    /// The `html` re-export is the only debounced work — `syncState()` (toolbar states,
+    /// word/char counts, placeholder dependency) always runs synchronously, so the editor
+    /// stays fully responsive. Pass `immediate: true` for programmatic content changes
+    /// (e.g. `setContent`) so `html` is correct the instant the call returns.
+    func contentDidChange(immediate: Bool = false) {
+        syncState()
+        if immediate {
+            htmlExportTask?.cancel()
+            htmlExportTask = nil
+            update(\.html, to: HTMLExporter.export(attributedText))
+        } else {
+            scheduleHTMLExport()
+        }
+    }
+
+    /// Restarts the trailing-debounce timer for the `html` export. Each new edit cancels
+    /// the pending export, so a burst of edits produces a single export once editing settles.
+    private func scheduleHTMLExport() {
+        htmlExportTask?.cancel()
+        htmlExportTask = Task { [weak self] in
+            guard let self else { return }
+            try? await Task.sleep(for: self.htmlDebounceInterval)
+            guard !Task.isCancelled else { return }
+            self.update(\.html, to: HTMLExporter.export(self.attributedText))
+        }
     }
 
     // MARK: - State Synchronization

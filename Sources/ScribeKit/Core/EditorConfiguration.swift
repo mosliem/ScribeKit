@@ -30,13 +30,20 @@ public struct EditorConfiguration: Sendable {
     /// Controls whether pasted content retains its formatting or is stripped to plain text.
     public var pasteMode: PasteMode
 
+    /// Debounce delay before the observable `EditorContext.html` value is re-exported
+    /// after an interactive edit. Coalesces bursts of edits (e.g. holding backspace) into
+    /// a single HTML export and a single `.onChange` notification. Does not affect editor
+    /// responsiveness — only the derived `html` value is debounced. Default 300ms.
+    public var htmlDebounceInterval: Duration
+
     public init(
         allowedToolbarItems: Set<EditorToolbarAction> = Set(EditorToolbarAction.allCases),
         placeholder: String = "Type something...",
         maxLength: Int = 0,
         isEditable: Bool = true,
         showsWordCount: Bool = false,
-        pasteMode: PasteMode = .rich
+        pasteMode: PasteMode = .rich,
+        htmlDebounceInterval: Duration = .milliseconds(300)
     ) {
         self.allowedToolbarItems = allowedToolbarItems
         self.placeholder = placeholder
@@ -44,6 +51,7 @@ public struct EditorConfiguration: Sendable {
         self.isEditable = isEditable
         self.showsWordCount = showsWordCount
         self.pasteMode = pasteMode
+        self.htmlDebounceInterval = htmlDebounceInterval
     }
 
     /// A default configuration with all toolbar items enabled.
