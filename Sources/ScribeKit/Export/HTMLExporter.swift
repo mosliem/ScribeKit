@@ -11,12 +11,25 @@ public struct HTMLExporter {
     /// Exports an `NSAttributedString` to an HTML string.
     /// Call this explicitly — do not use as a computed property — to avoid triggering
     /// expensive HTML generation during SwiftUI view-body evaluation.
-    public static func export(_ attributedString: NSAttributedString) -> String {
+    ///
+    /// - Parameters:
+    ///   - attributedString: The content to serialize.
+    ///   - wrapEmptyContentInTags: When `false` (default), content with no visible characters
+    ///     exports to an empty string. When `true`, empty content is still wrapped in its HTML
+    ///     tags — an empty document becomes `<p></p>`, and an empty styled paragraph keeps its
+    ///     markup (e.g. `<p style="text-align:center;"></p>`).
+    public static func export(
+        _ attributedString: NSAttributedString,
+        wrapEmptyContentInTags: Bool = false
+    ) -> String {
         // Return "" for content with no visible characters — a truly empty string, or a lone
         // empty/whitespace paragraph. Without this, a styled-but-empty paragraph exports as
         // stray markup (e.g. <p style="text-align:center;"></p>). Keeps export symmetric with
         // HTMLImporter, which collapses the same empty representations to an empty string.
-        guard !attributedString.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+        // Skipped when the caller opts into tags-on-empty via `wrapEmptyContentInTags`.
+        let hasVisibleContent =
+            !attributedString.string.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        guard hasVisibleContent || wrapEmptyContentInTags else {
             return ""
         }
 
@@ -102,6 +115,13 @@ public struct HTMLExporter {
         // string ends exactly at the last closing tag.
         while html.hasSuffix("\n") {
             html.removeLast()
+        }
+
+        // A truly zero-length document produces no paragraphs, so the loop above emits nothing.
+        // When the caller opted into tags-on-empty, fall back to a single empty paragraph so an
+        // empty editor still exports as <p></p> rather than "".
+        if html.isEmpty && wrapEmptyContentInTags {
+            return "<p></p>"
         }
 
         return html

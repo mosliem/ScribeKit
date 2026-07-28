@@ -37,7 +37,37 @@ final class HTMLExporterTests: XCTestCase {
         )
         XCTAssertEqual(HTMLExporter.export(heading), "")
     }
-    
+
+    // MARK: - wrapEmptyContentInTags
+
+    /// With `wrapEmptyContentInTags: true`, a truly empty document must export as `<p></p>`
+    /// rather than "".
+    func testExport_EmptyString_WithApplyTags_ReturnsEmptyParagraph() {
+        XCTAssertEqual(
+            HTMLExporter.export(NSAttributedString(), wrapEmptyContentInTags: true), "<p></p>")
+        XCTAssertEqual(
+            HTMLExporter.export(NSAttributedString(string: "\n"), wrapEmptyContentInTags: true), "<p></p>")
+    }
+
+    /// With `wrapEmptyContentInTags: true`, an empty styled paragraph keeps its markup instead
+    /// of collapsing to "".
+    func testExport_EmptyStyledParagraph_WithApplyTags_KeepsMarkup() {
+        let centered = NSMutableParagraphStyle()
+        centered.alignment = .center
+        let styled = NSAttributedString(string: "\n", attributes: [.paragraphStyle: centered])
+        XCTAssertEqual(
+            HTMLExporter.export(styled, wrapEmptyContentInTags: true),
+            "<p style=\"text-align:center;\"></p>")
+    }
+
+    /// The flag must not alter export of non-empty content.
+    func testExport_NonEmptyContent_UnaffectedByApplyTagsFlag() {
+        let attr = NSAttributedString(string: "Hello")
+        XCTAssertEqual(
+            HTMLExporter.export(attr, wrapEmptyContentInTags: true),
+            HTMLExporter.export(attr, wrapEmptyContentInTags: false))
+    }
+
     func testExport_PlainText_WrapsInParagraph() {
         let result = HTMLExporter.export(NSAttributedString(string: "Hello"))
         XCTAssertTrue(result.contains("<p>") || result.contains("<p "))

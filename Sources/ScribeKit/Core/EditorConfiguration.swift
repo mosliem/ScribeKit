@@ -36,6 +36,18 @@ public struct EditorConfiguration: Sendable {
     /// responsiveness — only the derived `html` value is debounced. Default 300ms.
     public var htmlDebounceInterval: Duration
 
+    /// Controls how empty content is exported to HTML.
+    ///
+    /// When `true` (default), empty content is still wrapped in its HTML tags: an empty editor
+    /// exports as `<p></p>`, and an empty styled paragraph keeps its markup
+    /// (e.g. `<p style="text-align:center;"></p>`).
+    ///
+    /// When `false`, content with no visible characters — a truly empty editor or a lone
+    /// empty/whitespace paragraph — exports to an empty string (`""`).
+    ///
+    /// Affects both `EditorContext.exportHTML()` and the observable `EditorContext.html`.
+    public var wrapsEmptyContentInTags: Bool
+
     public init(
         allowedToolbarItems: Set<EditorToolbarAction> = Set(EditorToolbarAction.allCases),
         placeholder: String = "Type something...",
@@ -43,7 +55,8 @@ public struct EditorConfiguration: Sendable {
         isEditable: Bool = true,
         showsWordCount: Bool = false,
         pasteMode: PasteMode = .rich,
-        htmlDebounceInterval: Duration = .milliseconds(300)
+        htmlDebounceInterval: Duration = .milliseconds(300),
+        wrapsEmptyContentInTags: Bool = true
     ) {
         self.allowedToolbarItems = allowedToolbarItems
         self.placeholder = placeholder
@@ -52,6 +65,7 @@ public struct EditorConfiguration: Sendable {
         self.showsWordCount = showsWordCount
         self.pasteMode = pasteMode
         self.htmlDebounceInterval = htmlDebounceInterval
+        self.wrapsEmptyContentInTags = wrapsEmptyContentInTags
     }
 
     /// A default configuration with all toolbar items enabled.

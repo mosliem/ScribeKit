@@ -69,6 +69,11 @@ public final class EditorContext {
     /// invalidate observers.
     @ObservationIgnored var htmlDebounceInterval: Duration = .milliseconds(300)
 
+    /// Whether empty content is still wrapped in HTML tags on export. Mirrors
+    /// `EditorConfiguration.wrapsEmptyContentInTags`; set by `EditorTextView` during wiring.
+    /// `@ObservationIgnored` — changing it must not invalidate observers.
+    @ObservationIgnored var wrapsEmptyContentInTags: Bool = true
+
     /// The in-flight debounced HTML export. Cancelled and restarted on each interactive edit.
     @ObservationIgnored private var htmlExportTask: Task<Void, Never>?
 
@@ -115,7 +120,7 @@ public final class EditorContext {
 
     /// Exports the current editor content as HTML.
     public func exportHTML() -> String {
-        HTMLExporter.export(attributedText)
+        HTMLExporter.export(attributedText, wrapEmptyContentInTags: wrapsEmptyContentInTags)
     }
 
     // MARK: - Style Actions
@@ -266,7 +271,7 @@ public final class EditorContext {
         if immediate {
             htmlExportTask?.cancel()
             htmlExportTask = nil
-            update(\.html, to: HTMLExporter.export(attributedText))
+            update(\.html, to: HTMLExporter.export(attributedText, wrapEmptyContentInTags: wrapsEmptyContentInTags))
         } else {
             scheduleHTMLExport()
         }
@@ -280,7 +285,7 @@ public final class EditorContext {
             guard let self else { return }
             try? await Task.sleep(for: self.htmlDebounceInterval)
             guard !Task.isCancelled else { return }
-            self.update(\.html, to: HTMLExporter.export(self.attributedText))
+            self.update(\.html, to: HTMLExporter.export(self.attributedText, wrapEmptyContentInTags: self.wrapsEmptyContentInTags))
         }
     }
 
