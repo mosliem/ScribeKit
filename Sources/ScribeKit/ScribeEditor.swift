@@ -34,9 +34,16 @@ public struct ScribeEditor: View {
 
     /// Bridges the coordinator's focus reporting to both the internal state (which drives the
     /// active border) and the external binding (for callers that track focus).
+    ///
+    /// The getter returns ONLY the external `isFocused` — this value drives whether
+    /// `EditorTextView` becomes/resigns first responder, so it must reflect the caller's intent.
+    /// It must NOT be OR'd with `isFocusedInternal`: once the editor is focused
+    /// (`isFocusedInternal == true`), an OR would keep the getter `true` even after the caller
+    /// sets `isFocused = false`, so the editor could never be dismissed programmatically. The
+    /// active border reads `isFocusedInternal` directly and does not depend on this getter.
     private var focusBinding: Binding<Bool> {
         Binding(
-            get: { isFocused || isFocusedInternal },
+            get: { isFocused },
             set: { newValue in
                 if isFocusedInternal != newValue { isFocusedInternal = newValue }
                 if isFocused != newValue { isFocused = newValue }
