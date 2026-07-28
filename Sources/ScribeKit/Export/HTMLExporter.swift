@@ -96,6 +96,14 @@ public struct HTMLExporter {
             html += closingTag(for: current)
         }
 
+        // Every block element is appended with a trailing "\n" for readable, line-per-element
+        // output. That leaves a single trailing newline on the whole document, which leaks into
+        // exportHTML()/context.html as a spurious "\n". Strip trailing newlines so the exported
+        // string ends exactly at the last closing tag.
+        while html.hasSuffix("\n") {
+            html.removeLast()
+        }
+
         return html
     }
 

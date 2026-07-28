@@ -43,6 +43,23 @@ final class HTMLExporterTests: XCTestCase {
         XCTAssertTrue(result.contains("<p>") || result.contains("<p "))
         XCTAssertTrue(result.contains("Hello"))
     }
+
+    /// The exported HTML must not carry a trailing newline — each block element is emitted with a
+    /// "\n" for readability, but the document as a whole should end exactly at the last closing tag
+    /// so it doesn't leak a spurious "\n" into exportHTML()/context.html.
+    func testExport_NoTrailingNewline() {
+        XCTAssertFalse(
+            HTMLExporter.export(NSAttributedString(string: "Hello")).hasSuffix("\n"),
+            "Single paragraph export should not end in a newline")
+
+        let multiline = HTMLExporter.export(NSAttributedString(string: "One\nTwo\nThree"))
+        XCTAssertFalse(multiline.hasSuffix("\n"), "Multi-paragraph export should not end in a newline")
+
+        let listAttrs: [NSAttributedString.Key: Any] = [.scribeKitListStyle: EditorListStyle.bullet.rawValue]
+        XCTAssertFalse(
+            HTMLExporter.export(NSAttributedString(string: "• Item", attributes: listAttrs)).hasSuffix("\n"),
+            "List export should not end in a newline")
+    }
     
     func testExport_BoldText_WrapsInStrong() {
         let font = UIFont.boldSystemFont(ofSize: 16)
