@@ -62,6 +62,14 @@ final class EditorCoordinator: NSObject, UITextViewDelegate {
     func syncPlaceholder(for textView: UITextView) {
         placeholderLabel?.isHidden = !textView.textStorage.string.isEmpty
     }
+
+    // MARK: - Keyboard accessory
+
+    /// Target for the keyboard "Done" accessory button. Dismisses the keyboard by resigning
+    /// first responder, which fires `textViewDidEndEditing` and sets `isFocused = false`.
+    @objc func dismissKeyboard() {
+        context.textView?.resignFirstResponder()
+    }
     
     func textViewDidChangeSelection(_ textView: UITextView) {
         context.syncState()

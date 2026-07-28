@@ -92,6 +92,8 @@ struct EditorTextView: UIViewRepresentable {
         // Store coordinator reference so it can toggle the placeholder from delegate callbacks
         representableContext.coordinator.placeholderLabel = placeholderLabel
 
+        syncKeyboardDoneButton(on: textView, coordinator: representableContext.coordinator)
+
         return textView
     }
 
@@ -100,6 +102,7 @@ struct EditorTextView: UIViewRepresentable {
         (uiView as? ScribeTextView)?.configuration = configuration
         context.htmlDebounceInterval = configuration.htmlDebounceInterval
         context.wrapsEmptyContentInTags = configuration.wrapsEmptyContentInTags
+        syncKeyboardDoneButton(on: uiView, coordinator: representableContext.coordinator)
         if uiView.isEditable != configuration.isEditable {
             uiView.isEditable = configuration.isEditable
         }
@@ -159,5 +162,39 @@ struct EditorTextView: UIViewRepresentable {
         // The actual isEmpty check uses the UITextView's storage directly for accuracy.
         _ = context.characterCount  // register dependency
         representableContext.coordinator.placeholderLabel?.isHidden = !uiView.textStorage.string.isEmpty
+    }
+
+    // MARK: - Keyboard "Done" accessory
+
+    /// Adds or removes the keyboard input-accessory toolbar to match
+    /// `configuration.showsKeyboardDoneButton`. Only mutates when the desired presence differs
+    /// from the current one, so it's safe to call on every `updateUIView` (i.e. every keystroke)
+    /// without rebuilding the toolbar or flickering the keyboard.
+    private func syncKeyboardDoneButton(on textView: UITextView, coordinator: EditorCoordinator) {
+        let wantsButton = configuration.showsKeyboardDoneButton
+        let hasButton = textView.inputAccessoryView != nil
+        guard wantsButton != hasButton else { return }
+
+        textView.inputAccessoryView = wantsButton ? Self.makeDoneToolbar(target: coordinator) : nil
+        // Reload the input views so a live keyboard picks up the change immediately.
+        if textView.isFirstResponder {
+            textView.reloadInputViews()
+        }
+    }
+
+    /// Builds a keyboard toolbar with a trailing localized "Done" button wired to the coordinator.
+    private static func makeDoneToolbar(target: EditorCoordinator) -> UIToolbar {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        toolbar.items = [
+            UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil),
+            UIBarButtonItem(
+                title: .localized("button.done"),
+                style: .done,
+                target: target,
+                action: #selector(EditorCoordinator.dismissKeyboard)
+            )
+        ]
+        return toolbar
     }
 }

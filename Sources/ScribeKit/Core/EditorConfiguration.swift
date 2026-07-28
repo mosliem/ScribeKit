@@ -27,6 +27,11 @@ public struct EditorConfiguration: Sendable {
     /// When `true`, a word and character count bar is shown below the editing surface.
     public var showsWordCount: Bool
 
+    /// When `true` (default), a keyboard input-accessory toolbar with a trailing "Done" button is
+    /// shown above the keyboard while editing. Tapping "Done" dismisses the keyboard (resigns
+    /// first responder). Set to `false` to hide the toolbar.
+    public var showsKeyboardDoneButton: Bool
+
     /// Controls whether pasted content retains its formatting or is stripped to plain text.
     public var pasteMode: PasteMode
 
@@ -54,6 +59,7 @@ public struct EditorConfiguration: Sendable {
         maxLength: Int = 0,
         isEditable: Bool = true,
         showsWordCount: Bool = false,
+        showsKeyboardDoneButton: Bool = true,
         pasteMode: PasteMode = .rich,
         htmlDebounceInterval: Duration = .milliseconds(300),
         wrapsEmptyContentInTags: Bool = true
@@ -63,6 +69,7 @@ public struct EditorConfiguration: Sendable {
         self.maxLength = max(0, maxLength)  // Clamp: negative values are treated as 0 (unlimited)
         self.isEditable = isEditable
         self.showsWordCount = showsWordCount
+        self.showsKeyboardDoneButton = showsKeyboardDoneButton
         self.pasteMode = pasteMode
         self.htmlDebounceInterval = htmlDebounceInterval
         self.wrapsEmptyContentInTags = wrapsEmptyContentInTags
